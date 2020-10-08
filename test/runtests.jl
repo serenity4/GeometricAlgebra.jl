@@ -1,72 +1,31 @@
-using Test
-using Grassmann
-using BenchmarkTools
+using ConformalGeometry
 
-@basis S"∅∞+++" # conformal geometric algebra
+d = 3
+k = BitVector(collect(rand(0:1) for _ ∈ 1:d))
 
-@test v∞^2 == v∅^2 == 0
-@test v∞ ⋅ v∅ == v∅ ⋅ v∞ == -1
+a = collect(1:2^d)
+b = collect(2^d .+ (1:2^d))
 
-# abstract type ConformalGeometry end
+const a0, a1, a2, a3, a4, a5, a6, a7 = getindex.(Ref(reverse(a)), 1:2^d)
+const b0, b1, b2, b3, b4, b5, b6, b7 = getindex.(Ref(reverse(b)), 1:2^d)
 
-# struct Point <: ConformalGeometry
-#     a
-#     Point(a) = new(1/2 * (2a + a^2*n - n_))
-# end
+const coefs_outerproduct = [
+    a7 * b0 + a6 * b1 - a5 * b2 + a4 * b3 + a3 * b4 - a2 * b5 + a1 * b6 + a0 * b7,
+    a6 * b0 + a4 * b2 - a2 * b4 + a0 * b6,
+    a5 * b0 + a4 * b1 - a1 * b4 + a0 * b5,
+    a4 * b0 + a0 * b4,
+    a3 * b0 + a2 * b1 - a1 * b2 + a0 * b3,
+    a2 * b0 + a0 * b2,
+    a1 * b0 + a0 * b1,
+    a0 * b0
+]
 
-# struct Line <: ConformalGeometry
-#     b
-# end
-
-# Point(a) = Point(a, 1/2 * (2a + a^2*n - n_))
-
-# Line(p1::Point, p2::Point) = Line(p1, p2, p1 ∧ p2)
-# Line(a1, a2) = Line(Point(a1), Point(a2))
-
-# abstract type GeometryTrait end
-
-# struct GeometryType end
-# struct Point <: GeometryTrait end
-
-# GeometryType(a) = a^2 == 0v ? Point :
-
-vec3d(a::Grassmann.AbstractTensors.Values{5,Float64}) = a.v[3:end]
-vec3d(a::Grassmann.AbstractTensors.Values{32,Float64}) = a.v[4:6]
-vec3d(a::Grassmann.Chain{V,1,Float64,5}) = a.v[3:end]
-vec3d(a::Grassmann.MultiVector{V,Float64,32}) = a.v[4:6]
-
-point(vec3d) = vec3d + 0.5*vec3d^2*v∞ + v∅
-translate(a, p) = exp(1/2 * v∞ * p) >>> a
-rotate(a, r, α) = exp(-1/2 * α * r) >>> a
-
-point_pair(a, b) = a ∧ b
-circle(a, b, c) = point_pair(a, b) ∧ c
-line(a, b) = circle(a, b, v∞)
-radius(circ) = sqrt(-circ^2 / (circ ∧ v∞)^2)
-center(circ) = circ * v∞ * circ
-sphere(a, b, c, d) = circle(a, b, c) ∧ d
-plane(a, b, c) = sphere(a, b, c, v∞)
-
-a = point(v1)
-b = point(v2)
-
-@test a^2 == b^2 == 0
-
-translate(a, 10v2)
-
-@test rotate(a, v12, π/2) ≈ point(v2)
-@test rotate(a, v12, π) ≈ point(-v1)
-@test vec3d(translate(a, v1)) ≈ vec3d(point(2v1))
-
-@test translate(translate(a, v1), -v1) ≈ a
-
-
-
-point_pair(a, b)
-line(a, b)
-circ = circle(a, b, point(-v1))
-radius(circ)
-
-sph = sphere(a, b, point(v3), point(-v1))
-
-radius(sph)
+@assert binary_tree_index(BitVector(repeat([1], d))) == 1
+@assert binary_tree_index(BitVector(repeat([0], d))) == 2^d
+@assert coef_outer_product_labels(Bool[1, 0, 1]) == [
+    Bool[1, 0, 1],
+    Bool[1, 0, 0],
+    Bool[0, 0, 1],
+    Bool[0, 0, 0]
+]
+@assert (r = 1:-1:0; all(coef_outer_product.(Ref(a), Ref(b), (Bool[i, j, k] for i=r for j=r for k=r)) .== coefs_outerproduct))
