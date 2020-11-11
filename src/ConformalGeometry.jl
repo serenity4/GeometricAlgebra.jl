@@ -1,7 +1,6 @@
 module ConformalGeometry
 
 using StaticArrays
-using SimpleTraits
 using IterTools
 using Combinatorics
 
