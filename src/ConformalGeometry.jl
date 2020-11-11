@@ -1,21 +1,21 @@
 module ConformalGeometry
 
 using StaticArrays
-
-abstract type GAEntity{D} end
+using SimpleTraits
+using IterTools
+using Combinatorics
 
 struct ZeroElement end
-Base.zero(::Type{<:GAEntity}) = ZeroElement()
-Base.show(io::IO, ::ZeroElement) = print(io, '0')
+
+const 𝟎 = ZeroElement()
+
+Base.show(io::IO, ::ZeroElement) = print(io, '𝟎')
 
 include("basis_elements.jl")
 include("multivectors.jl")
 include("operators.jl")
 
 export
-    # GA entities
-    GAEntity,
-    
     # GA element types
     ZeroElement,
     BasisElement,
@@ -25,6 +25,7 @@ export
     basis_index,
     grade,
     grade_index,
+    𝟎,
 
     # GA operators
     ∧,
