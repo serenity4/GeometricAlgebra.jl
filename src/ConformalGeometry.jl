@@ -4,29 +4,36 @@ using StaticArrays
 using IterTools
 using Combinatorics
 
-struct ZeroElement end
+struct Zero end
 
-const 𝟎 = ZeroElement()
+const 𝟎 = Zero()
 
-Base.show(io::IO, ::ZeroElement) = print(io, '𝟎')
+Base.show(io::IO, ::Zero) = print(io, '𝟎')
 
-include("basis_elements.jl")
+include("blades.jl")
 include("multivectors.jl")
 include("operators.jl")
 
 export
-    # GA element types
-    ZeroElement,
-    BasisElement,
-    ZeroElement,
-    Element,
-    Multivector,
+    # zero
+    Zero,
+    𝟎,
+
+    # blades
+    UnitBlade,
+    Blade,
     basis_index,
     grade,
     grade_index,
-    𝟎,
+    blades,
+    blades_from_grade,
 
-    # GA operators
+    # multivectors
+    Multivector,
+    vectors,
+    is_homogeneous,
+
+    # operators
     ∧,
     grade_els
 

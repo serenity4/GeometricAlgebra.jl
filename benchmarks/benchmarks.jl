@@ -9,14 +9,14 @@ import Grassmann: Grassmann, @basis
 
 include(joinpath(@__DIR__, "..", "test", "definitions.jl"))
 
-@info "Creation of Elements"
+@info "Blades"
 display(@benchmark Ref(5*$v1)[] ∧ Ref(5*$v1)[])
 display(@benchmark Ref(5*$v1)[] ∧ Ref(5*$v2)[])
 @info "=== Grassmann"
 display(@benchmark Grassmann.:∧(Ref(5*$g1)[], Ref(5*$g1)[]))
 display(@benchmark Grassmann.:∧(Ref(5*$g1)[], Ref(5*$g2)[]))
 
-@info "Creation of Multivectors"
+@info "Multivectors"
 display(@benchmark Ref(5*$v1)[] + Ref(5*$v2)[])
 @info "=== Grassmann"
 display(@benchmark Ref(5*$g1)[] + Ref(5*$g2)[])
@@ -27,8 +27,8 @@ end
 
 f(x, y) = Grassmann.:∧(x, y)
 
-@benchmark f(Ref(5 * $g1 + 3 * $g3 + 1 * $g12)[], Ref(5 * $g2)[])
-@benchmark ∧(Ref(5 * $v1 + 3 * $v3)[], Ref(1 * $v12 + 5 * $v2)[])
+display(@benchmark f(Ref(5 * $g1 + 3 * $g3 + 1 * $g12)[], Ref(5 * $g2)[]))
+display(@benchmark ∧(Ref(5 * $v1 + 3 * $v3)[], Ref(1 * $v12 + 5 * $v2)[]))
 
 # f(x, y) = 5x ∧ 5y
 # Profile.init(n=100000000, delay=0.00001)
