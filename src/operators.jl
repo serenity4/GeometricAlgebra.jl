@@ -48,6 +48,24 @@ Outer product between `x` and `y`.
 function ∧ end
 
 """
+    `x ⋅ y`
+Inner product of `x` and `y`.
+"""
+function ⋅ end
+
+"""
+    `lcontract(x, y)`
+Left contraction of `x` and `y`.
+"""
+function lcontract end
+
+"""
+    `rcontract(x, y)`
+Left contraction of `x` and `y`.
+"""
+function rcontract end
+
+"""
 Outer product backend. Returns 𝟎 if `is_zero(x, y)`.
 """
 outer_product(x, y, result::Type{IsZero}) = 𝟎
@@ -72,3 +90,10 @@ end
 function Base.sign(::typeof(∧), x::UnitBlade{G1}, y::UnitBlade{G2}) where {G1,G2}
     1 - 2 * parity(sortperm(SVector{G1+G2, Int}(indices(x)..., indices(y)...)))
 end
+
+result_grade(::typeof(|), ka, kb) = abs(ka - kb)
+result_grade(::typeof(∧), ka, kb) = ka + kb
+result_grade(::typeof(lcontract), ka, kb) = kb - ka
+result_grade(::typeof(rcontract), ka, kb) = ka - kb
+result_grade(::typeof(*), ka, kb) = result_grade(|, ka, kb):result_grade(∧, ka, kb)
+result_grade(::typeof(⋅), ka, kb) = result_grade(|, ka, kb):result_grade(∧, ka, kb)
