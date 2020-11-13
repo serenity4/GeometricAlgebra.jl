@@ -6,9 +6,10 @@ Base.show(io::IO, ::Zero) = print(io, '𝟎')
 
 """
 Contains `IsZero` and `IsNonZero` types, used to implement Holy traits
-to dispatch between outer products that output 0 and those who don't.
+to dispatch between outer products whose result are 𝟎 and those who don't.
 """
 abstract type OperationResult end
+
 abstract type IsZero <: OperationResult end
 abstract type IsNonZero <: OperationResult end
 
@@ -49,25 +50,25 @@ end
 
 """
     `x ∧ y`
-Outer product between `x` and `y`.
+Outer product of `x` with `y`.
 """
 function ∧ end
 
 """
     `x ⋅ y`
-Inner product of `x` and `y`.
+Inner product of `x` with `y`.
 """
 function ⋅ end
 
 """
     `lcontract(x, y)`
-Left contraction of `x` and `y`.
+Left contraction of `x` with `y`.
 """
 function lcontract end
 
 """
     `rcontract(x, y)`
-Left contraction of `x` and `y`.
+Left contraction of `x` with `y`.
 """
 function rcontract end
 
@@ -76,8 +77,8 @@ Outer product backend. Returns 𝟎 if `is_zero(x, y)`.
 """
 outer_product(x, y, result::Type{IsZero}) = 𝟎
 outer_product(x, y, result::Type{IsNonZero}) = outer_product(x, y)
-
-outer_product(::UnitBlade{G1,I1,D}, ::UnitBlade{G2,I2,D}) where {G1,G2,I1,I2,D} = UnitBlade{G1+G2,SVector{G1+G2,Int}(sort(vcat(I1,I2))),D}()
+outer_product(::UnitBlade{G1,I1,D}, ::UnitBlade{G2,I2,D}) where {G1,G2,I1,I2,D} =
+    UnitBlade{G1+G2,SVector{G1+G2,Int}(sort(vcat(I1,I2))),D}()
 
 function outer_product(x::Blade{<:UnitBlade{G1,I1},D}, y::Blade{<:UnitBlade{G2,I2},D}) where {G1,G2,I1,I2,D}
     vec = outer_product(x.unit_blade, y.unit_blade)
@@ -90,16 +91,22 @@ end
 ∧(x, y...) = foldl(∧, vcat(x, y...))
 
 function ∧(x::Multivector{D}, y::Multivector{D}) where {D}
-    sum(map(∧, vectors(x), vectors(y)))
+    sum(map(∧, blades(x), blades(y)))
 end
 
+"""
+Sign of an outer product, determined from the permutation of `UnitBlade` indices.
+"""
 function Base.sign(::typeof(∧), x::UnitBlade{G1}, y::UnitBlade{G2}) where {G1,G2}
     1 - 2 * parity(sortperm(SVector{G1+G2, Int}(indices(x)..., indices(y)...)))
 end
 
-result_grade(::typeof(|), ka, kb) = abs(ka - kb)
-result_grade(::typeof(∧), ka, kb) = ka + kb
-result_grade(::typeof(lcontract), ka, kb) = kb - ka
-result_grade(::typeof(rcontract), ka, kb) = ka - kb
-result_grade(::typeof(*), ka, kb) = result_grade(|, ka, kb):result_grade(∧, ka, kb)
-result_grade(::typeof(⋅), ka, kb) = result_grade(|, ka, kb):result_grade(∧, ka, kb)
+"""
+Return the grade(s) that can be present in the result of an operation.
+"""
+result_grade(::typeof(|), grade_a, grade_b) = abs(grade_a - grade_b)
+result_grade(::typeof(∧), grade_a, grade_b) = grade_a + grade_b
+result_grade(::typeof(lcontract), grade_a, grade_b) = grade_b - grade_a
+result_grade(::typeof(rcontract), grade_a, grade_b) = grade_a - grade_b
+result_grade(::typeof(*), grade_a, grade_b) = result_grade(|, grade_a, grade_b):result_grade(∧, grade_a, grade_b)
+result_grade(::typeof(⋅), grade_a, grade_b) = result_grade(|, grade_a, grade_b):result_grade(∧, grade_a, grade_b)

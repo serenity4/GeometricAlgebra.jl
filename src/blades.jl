@@ -10,16 +10,13 @@ indices(b::UnitBlade{G,I}) where {G,I} = I
 """
     Blade{B,T}
 
-[`UnitBlade`](@ref) associated with a value of type `T`.
-
-Can be interpreted as a scaled version of a unit blade, in the case where `T` is a scalar. Instances are multivectors living in the subspace spanned by `B`.
+Blade living in the subspace spanned by `B`, with a coefficient of type `T`.
+Can be interpreted as a scaled version of a [`UnitBlade`](@ref).
 """
 struct Blade{B <: UnitBlade,T}
     coef::T
     unit_blade::B
 end
-
-Blade(_, zero::Zero) = zero
 
 grade(b::UnitBlade{G}) where {G} = G
 grade(b::Blade) = grade(b.unit_blade)
@@ -28,27 +25,42 @@ grade_index(d, i::Integer...) = grade_index(d, collect(i))
 grade_index(b::UnitBlade{G,I,D}) where {G,I,D} = grade_index(D, I)
 grade_index(b::Blade) = grade_index(b.unit_blade)
 
-function grade_index(d, i)
-    g = length(i)
-    if g == 0
+"""
+    `grade_index(dim, i)`
+Return the grade index of `i`.
+
+## Example
+```julia
+julia> grade_index(3, [1])
+1
+
+julia> grade_index(3, [1, 2])
+1
+
+julia> grade_index(3, [3, 1])
+3
+```
+"""
+function grade_index(dim, i::AbstractVector)
+    grade = length(i)
+    if grade == 0
         1
-    elseif g == 1
+    elseif grade == 1
         first(i)
     elseif first(i) == 1
-        grade_index(d-1, i[2:end] .- 1)
+        grade_index(dim - 1, i[2:end] .- 1)
     else
-        # grade_index(d-1, i[1:end-1] .- i[1]) + (i[2] - i[1]) * (d - i[1])
-        grade_index(d-1, i .- 1) + (d - 1)
+        grade_index(dim - 1, i .- 1) + (dim - 1)
     end
 end
 
-blades_from_grade(dim, g) =
-    (UnitBlade{length(s), SVector{length(s)}(s), dim}() for s ∈ subsets(1:dim, g))
+unit_blades_from_grade(dim, grade) =
+    (UnitBlade{length(s), SVector{length(s)}(s), dim}() for s ∈ subsets(1:dim, grade))
 
-blades(dim::Integer) = blades_from_grade.(dim, 0:dim)
+unit_blades(dim::Integer) = unit_blades_from_grade.(dim, 0:dim)
 
 """
-Return `val` as a subscript, used for printing `UnitBlade` and `Blade` vectors.
+Return `val` as a subscript, used for printing `UnitBlade` and `Blade` instances.
 """
 function subscript(val)
     r = div(val, 10)

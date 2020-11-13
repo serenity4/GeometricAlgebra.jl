@@ -1,4 +1,4 @@
-module ConformalGeometry
+module GeometricAlgebra
 
 using StaticArrays
 using IterTools
@@ -10,24 +10,22 @@ include("operators.jl")
 
 export
     # blades
-    UnitBlade,
-    Blade,
+    UnitBlade, Blade,
     basis_index,
-    grade,
-    grade_index,
-    blades,
-    blades_from_grade,
+    grade, grade_index,
+    unit_blades, unit_blades_from_grade,
 
     # multivectors
     Multivector,
-    vectors,
+    blades,
     is_homogeneous,
 
     # operators
-    ∧,
-    grade_els
+    ∧, ⋅,
+    lcontract, rcontract,
+    grade_els,
     Zero,
-    𝟎,
+    𝟎
 
 end
 

@@ -1,4 +1,4 @@
-using ConformalGeometry
+using GeometricAlgebra
 using StaticArrays
 using Test
 
