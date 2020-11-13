@@ -1,3 +1,9 @@
+struct Zero end
+
+const 𝟎 = Zero()
+
+Base.show(io::IO, ::Zero) = print(io, '𝟎')
+
 """
 Contains `IsZero` and `IsNonZero` types, used to implement Holy traits
 to dispatch between outer products that output 0 and those who don't.
