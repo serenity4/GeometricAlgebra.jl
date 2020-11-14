@@ -1,10 +1,11 @@
 """
-    UnitBlade{G,I,D}
+    UnitBlade{G,I,D,N}
 
 Unit blade with grade `G` and indices `I`, embedded in a `D`-dimensional geometric algebra.
+`N` represents the index of the blade in the 1:2^`D` range.
 """
-struct UnitBlade{G,I,D} end
-
+struct UnitBlade{G,I,N,D} end
+UnitBlade{G,I,D}() where {G,I,D} = UnitBlade{G,I,grade_index(D, I),D}()
 indices(b::UnitBlade{G,I}) where {G,I} = I
 
 """
@@ -22,7 +23,7 @@ grade(b::UnitBlade{G}) where {G} = G
 grade(b::Blade) = grade(b.unit_blade)
 
 grade_index(d, i::Integer...) = grade_index(d, collect(i))
-grade_index(b::UnitBlade{G,I,D}) where {G,I,D} = grade_index(D, I)
+grade_index(b::UnitBlade{G,I,N,D}) where {G,I,N,D} = grade_index(D, I)
 grade_index(b::Blade) = grade_index(b.unit_blade)
 
 """
