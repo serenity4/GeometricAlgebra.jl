@@ -34,5 +34,5 @@ end
 Materialize the blades of the multivector.
 """
 function blades(a::Multivector)
-    vcat(map((c, b) -> Blade.(c, b), a.coefs, collect.(blades(a)))...)
+    vcat(map((c, b) -> Blade.(c, b), a.coefs, collect.(unit_blades(a)))...)
 end

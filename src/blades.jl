@@ -71,3 +71,25 @@ end
 Base.show(io::IO, b::UnitBlade{G,I}) where {G,I} = print(io, "v$(join(map(subscript, I)))")
 Base.show(io::IO, b::Blade{<:UnitBlade{G,I}}) where {G,I} = print(io, "$(b.coef)", string(b.unit_blade))
 
+"""
+    @basis [mod=Main, prefix=:v] <dim>
+Pull in all unit blade symbols from a `dim`-dimensional geometric algebra.
+The symbols are evaluated inside the module `mod`, prefixed with `prefix`.
+"""
+macro basis(mod, prefix, dim)
+    @assert dim isa Integer "Only numbers are supported for the dimension argument (received $dim)"
+    prefix isa QuoteNode ? prefix = prefix.value : nothing
+    @assert prefix isa Symbol "Only symbols are supported for the second argument (received $prefix)"
+    ub = vcat(collect.(unit_blades(dim))...)
+    names = map(x -> Symbol(prefix, join(string.(indices(x)))), ub)
+    exprs = map((x, y) -> :($x = $y), names, ub)
+    quote
+        for (b, name, expr) ∈ zip($ub, $names, $exprs)
+            Base.eval($(esc(mod)), expr)
+        end
+        $ub
+    end
+end
+
+macro basis(prefix, dim) :(@basis($(esc(Main)), $prefix, $dim)) end
+macro basis(dim) :(@basis(:v, $dim)) end

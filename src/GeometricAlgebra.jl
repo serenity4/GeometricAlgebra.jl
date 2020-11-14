@@ -14,6 +14,7 @@ export
     basis_index,
     grade, grade_index,
     unit_blades, unit_blades_from_grade,
+    @basis,
 
     # multivectors
     Multivector,
