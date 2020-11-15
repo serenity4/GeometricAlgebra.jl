@@ -5,6 +5,7 @@ using IterTools
 using Combinatorics
 
 include("blades.jl")
+include("algebra.jl")
 include("multivectors.jl")
 include("operators.jl")
 
@@ -26,7 +27,13 @@ export
     lcontract, rcontract,
     grade_els,
     Zero,
-    𝟎
+    𝟎,
+
+    # algebra
+    GeomAlgebra,
+    Signature,
+    dimension,
+    is_degenerate
 
 end
 
