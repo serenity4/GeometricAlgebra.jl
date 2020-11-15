@@ -27,26 +27,18 @@ Base.:*(x::UnitBlade, y::Number) = y * x
 Base.:*(x::Number, y::Blade) = Blade(x * y.coef, y.unit_blade)
 Base.:*(x::Blade, y::Number) = y * x
 
-Base.:+(x::Blade{<:UnitBlade{G,I,D}}, y::Blade{<:UnitBlade{G,I,D}}) where {G,I,D} =
+Base.:+(x::Blade{<:UnitBlade{G,I}}, y::Blade{<:UnitBlade{G,I}}) where {G,I} =
     Blade(x.coef + y.coef, x.unit_blade)
 Base.:+(x::Blade, y::Zero) = x
 Base.:+(x::Zero, y::Blade) = y
 
-function Base.:+(x::Blade{<:UnitBlade{G,I1,D},T}, y::Blade{<:UnitBlade{G,I2,D},T}) where {G,I1,I2,D,T}
-    grades = SVector{1,Int}(G)
-    coefs = @MVector(zeros(T, binomial(D, G)))
-    coefs[grade_index(x)] = x.coef
-    coefs[grade_index(y)] = y.coef
-    return Multivector{D}(grades, tuple(SVector(coefs)))
+function Base.:+(x::Blade, y::Blade)
+    Multivector(@SVector([x, y]))
 end
 
-function Base.:+(x::Blade{<:UnitBlade{G1,I1,D},T}, y::Blade{<:UnitBlade{G2,I2,D},T}) where {G1,G2,I1,I2,D,T}
-    grades = SVector{2,Int}(G1, G2)
-    coefs_1, coefs_2 = (@MVector(zeros(T, binomial(D, G1))), @MVector(zeros(T, binomial(D, G2))))
-    coefs_1[grade_index(x)] = x.coef
-    coefs_2[grade_index(y)] = y.coef
-    return Multivector{D}(grades, (SVector(coefs_1), SVector(coefs_2)))
-end
+Base.:+(x::Multivector{T}, y::Blade{<:UnitBlade,T}) where {T} = Multivector(x, y)
+Base.:+(x::Blade{<:UnitBlade,T}, y::Multivector{T}) where {T} = y + x
+Base.:+(x::UnitBlade, y::UnitBlade) = Multivector(SVector{2}(1x, 1y))
 
 """
     `x ∧ y`
@@ -77,10 +69,10 @@ Outer product backend. Returns 𝟎 if `is_zero(x, y)`.
 """
 outer_product(x, y, result::Type{IsZero}) = 𝟎
 outer_product(x, y, result::Type{IsNonZero}) = outer_product(x, y)
-outer_product(::UnitBlade{G1,I1,D}, ::UnitBlade{G2,I2,D}) where {G1,G2,I1,I2,D} =
-    UnitBlade{G1+G2,SVector{G1+G2,Int}(sort(vcat(I1,I2))),D}()
+outer_product(::UnitBlade{G1,I1}, ::UnitBlade{G2,I2}) where {G1,G2,I1,I2} =
+    UnitBlade{G1+G2,SVector{G1+G2,Int}(sort(vcat(I1,I2)))}()
 
-function outer_product(x::Blade{<:UnitBlade{G1,I1},D}, y::Blade{<:UnitBlade{G2,I2},D}) where {G1,G2,I1,I2,D}
+function outer_product(x::Blade, y::Blade)
     vec = outer_product(x.unit_blade, y.unit_blade)
     ρ = x.coef * y.coef
     s = sign(∧, x.unit_blade, y.unit_blade)
@@ -89,10 +81,7 @@ end
 
 ∧(x, y) = outer_product(x, y, is_zero(x, y))
 ∧(x, y...) = foldl(∧, vcat(x, y...))
-
-function ∧(x::Multivector{D}, y::Multivector{D}) where {D}
-    sum(map(∧, blades(x), blades(y)))
-end
+∧(x::Multivector, y::Multivector) = sum(map(∧, blades(x), blades(y)))
 
 """
 Sign of an outer product, determined from the permutation of `UnitBlade` indices.

@@ -1,11 +1,10 @@
 """
-    UnitBlade{G,I,D,N}
+    UnitBlade{G,I}
 
-Unit blade with grade `G` and indices `I`, embedded in a `D`-dimensional geometric algebra.
-`N` represents the index of the blade in the 1:2^`D` range.
+Unit blade with grade `G` and indices `I`.
 """
-struct UnitBlade{G,I,D} end
-indices(b::UnitBlade{G,I}) where {G,I} = I
+struct UnitBlade{G,I} end
+UnitBlade(I) = UnitBlade{length(I), I}()
 
 """
     Blade{B,T}
@@ -21,9 +20,12 @@ end
 grade(b::UnitBlade{G}) where {G} = G
 grade(b::Blade) = grade(b.unit_blade)
 
-grade_index(d, i::Integer...) = grade_index(d, collect(i))
-grade_index(b::UnitBlade{G,I,D}) where {G,I,D} = grade_index(D, I)
-grade_index(b::Blade) = grade_index(b.unit_blade)
+indices(b::UnitBlade{G,I}) where {G,I} = I
+indices(b::Blade) = indices(b.unit_blade)
+
+grade_index(i::Integer...; dim) = grade_index(dim, collect(i))
+grade_index(dim, b::UnitBlade{G,I}) where {G,I} = grade_index(dim, I)
+grade_index(dim, b::Blade) = grade_index(dim, b.unit_blade)
 
 """
     `grade_index(dim, i)`
@@ -55,7 +57,7 @@ function grade_index(dim, i::AbstractVector)
 end
 
 unit_blades_from_grade(dim, grade) =
-    (UnitBlade{length(s), SVector{length(s)}(s), dim}() for s ∈ subsets(1:dim, grade))
+    (UnitBlade(SVector{length(s)}(s)) for s ∈ subsets(1:dim, grade))
 
 unit_blades(dim::Integer) = unit_blades_from_grade.(dim, 0:dim)
 

@@ -1,7 +1,6 @@
-mv12 = Multivector{d}([1], [1, 1, 0])
-
 @testset "Addition" begin
-    1v1 + 1v2 == mv12
-    1v1 + mv12 == Multivector{d}([1], [2, 1, 0])
-    v1 + v2 == mv12
+    @test 1v1 + 1v2 == mv_1
+    @test 1v2 + 1v12 == Multivector(SVector{2}(1v2, 1v12))
+    1v1 + mv_1 == Multivector(SVector{2}(2v1, 1v2))
+    v1 + v2 == mv_1
 end
