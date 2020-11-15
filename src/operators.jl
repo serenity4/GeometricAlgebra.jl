@@ -16,18 +16,17 @@ abstract type IsNonZero <: OperationResult end
 """
 Trait function for determining an `OperationResult` type.
 """
-is_zero(x, y) = any(i ∈ y for i ∈ x) || any(j ∈ x for j ∈ y) ? IsZero : IsNonZero
-is_zero(x::UnitBlade{G1,I1}, y::UnitBlade{G2,I2}) where {G1,G2,I1,I2} = is_zero(I1, I2)
-is_zero(x::Blade{<:UnitBlade{G1,I1}}, y::Blade{<:UnitBlade{G2,I2}}) where {G1,G2,I1,I2} = is_zero(I1, I2)
-is_zero(x, y::Zero) = IsZero
-is_zero(x::Zero, y) = IsZero
+function is_zero end
+
+is_zero(op, x, y::Zero) = IsZero
+is_zero(op, x::Zero, y) = IsZero
 
 Base.:*(x::Number, y::UnitBlade) = Blade(x, y)
 Base.:*(x::UnitBlade, y::Number) = y * x
 Base.:*(x::Number, y::Blade) = Blade(x * y.coef, y.unit_blade)
 Base.:*(x::Blade, y::Number) = y * x
 
-Base.:+(x::Blade{<:UnitBlade{G,I}}, y::Blade{<:UnitBlade{G,I}}) where {G,I} =
+Base.:+(x::Blade{<:UnitBlade{S,G,I}}, y::Blade{<:UnitBlade{S,G,I}}) where {S,G,I} =
     Blade(x.coef + y.coef, x.unit_blade)
 Base.:+(x::Blade, y::Zero) = x
 Base.:+(x::Zero, y::Blade) = y
@@ -69,8 +68,8 @@ Outer product backend. Returns 𝟎 if `is_zero(x, y)`.
 """
 outer_product(x, y, result::Type{IsZero}) = 𝟎
 outer_product(x, y, result::Type{IsNonZero}) = outer_product(x, y)
-outer_product(::UnitBlade{G1,I1}, ::UnitBlade{G2,I2}) where {G1,G2,I1,I2} =
-    UnitBlade{G1+G2,SVector{G1+G2,Int}(sort(vcat(I1,I2)))}()
+outer_product(::UnitBlade{S,G1,I1}, ::UnitBlade{S,G2,I2}) where {S,G1,G2,I1,I2} =
+    UnitBlade{S,G1+G2,SVector{G1+G2,Int}(sort(vcat(I1,I2)))}()
 
 function outer_product(x::Blade, y::Blade)
     vec = outer_product(x.unit_blade, y.unit_blade)
@@ -79,9 +78,35 @@ function outer_product(x::Blade, y::Blade)
     Blade(s * ρ, vec)
 end
 
-∧(x, y) = outer_product(x, y, is_zero(x, y))
+∧(x, y) = outer_product(x, y, is_zero(∧, x, y))
 ∧(x, y...) = foldl(∧, vcat(x, y...))
 ∧(x::Multivector, y::Multivector) = sum(map(∧, blades(x), blades(y)))
+
+⋅(x, y) = inner_product(x, y, is_zero(⋅, x, y))
+⋅(x, y...) = foldl(⋅, vcat(x, y...))
+⋅(x::Multivector, y::Multivector) = sum(map(⋅, blades(x), blades(y)))
+
+inner_product(x, y, result::Type{IsZero}) = 𝟎
+inner_product(x, y, result::Type{IsNonZero}) = inner_product(x, y)
+
+function inner_product(x::UnitBlade{S}, y::UnitBlade{S}) where {S}
+    new_indices = sort(symdiff(indices(x), indices(y)))
+    UnitBlade(SVector{length(new_indices)}(new_indices), S)
+end
+function inner_product(x::Blade{<:UnitBlade{S}}, y::Blade{<:UnitBlade{S}}) where {S}
+    vec = x.unit_blade ⋅ y.unit_blade
+    ρ = metric(x, y)
+    s = sign(⋅, x.unit_blade, y.unit_blade)
+    Blade(s * ρ, vec)
+end
+
+is_zero(::typeof(∧), x::UnitBlade{S,G1,I1}, y::UnitBlade{S,G2,I2}) where {S,G1,G2,I1,I2} = is_zero(∧, I1, I2)
+is_zero(::typeof(∧), x::Blade{<:UnitBlade{S,G1,I1}}, y::Blade{<:UnitBlade{S,G2,I2}}) where {S,G1,G2,I1,I2} = is_zero(∧, I1, I2)
+is_zero(::typeof(∧), x, y) = any(i ∈ y for i ∈ x) || any(j ∈ x for j ∈ y) ? IsZero : IsNonZero
+
+is_zero(::typeof(⋅), x::UnitBlade{S,G1,I1}, y::UnitBlade{S,G2,I2}) where {S,G1,G2,I1,I2} = is_zero(⋅, I1, I2)
+is_zero(::typeof(⋅), x::Blade{<:UnitBlade{S,G1,I1}}, y::Blade{<:UnitBlade{S,G2,I2}}) where {S,G1,G2,I1,I2} = is_zero(⋅, I1, I2)
+is_zero(::typeof(⋅), x, y) = all(i ∉ y for i ∈ x) && all(j ∉ x for j ∈ y) ? IsZero : IsNonZero
 
 """
 Sign of an outer product, determined from the permutation of `UnitBlade` indices.
@@ -92,7 +117,6 @@ Base.sign(::typeof(∧), i::AbstractVector{<:Integer}, j::AbstractVector{<:Integ
     1 - 2 * parity(sortperm(SVector{length(i) + length(j),Int}(vcat(i, j))))
 Base.sign(::typeof(⋅), i::AbstractVector{<:Integer}, j::AbstractVector{<:Integer}) = sign(∧, i, j)
 Base.sign(::typeof(*), i::AbstractVector{<:Integer}, j::AbstractVector{<:Integer}) = sign(∧, i, j)
-
 
 """
 Return the grade(s) that can be present in the result of an operation.

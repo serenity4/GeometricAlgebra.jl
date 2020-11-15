@@ -8,7 +8,7 @@ end
 Multivector(blades::Vector{<:Blade}) = Multivector(SVector{length(blades)}(blades))
 Multivector(blades::Blade...) = Multivector(collect(blades))
 
-function Multivector(mv::Multivector{T,V}, b::Blade{<:UnitBlade{G,I},T}) where {G,I,T,V}
+function Multivector(mv::Multivector{T,V}, b::Blade{<:UnitBlade{S,G,I},T}) where {S,G,I,T,V}
     inds = indices(mv)
     if I ∈ inds
         v = V(map((x, i) -> (i == I ? x + b : x), mv.blades, inds))

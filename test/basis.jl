@@ -1,6 +1,6 @@
 module TestModule end
 
-@basis TestModule g 3
+@basis TestModule g "++-" 3
 
 @testset "Basis macro" begin
     @test isdefined(TestModule, :g)

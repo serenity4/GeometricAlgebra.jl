@@ -4,8 +4,7 @@ using StaticArrays
 using IterTools
 using Combinatorics
 
-include("blades.jl")
-include("algebra.jl")
+include("signatures.jl")
 include("multivectors.jl")
 include("operators.jl")
 
@@ -16,6 +15,7 @@ export
     grade, grade_index,
     unit_blades, unit_blades_from_grade,
     @basis,
+    signature,
 
     # multivectors
     Multivector,
@@ -29,11 +29,12 @@ export
     Zero,
     𝟎,
 
-    # algebra
-    GeomAlgebra,
+    # signatures
+    Ø,
     Signature,
     dimension,
-    is_degenerate
+    is_degenerate,
+    metric
 
 end
 
