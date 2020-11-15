@@ -86,9 +86,13 @@ end
 """
 Sign of an outer product, determined from the permutation of `UnitBlade` indices.
 """
-function Base.sign(::typeof(∧), x::UnitBlade{G1}, y::UnitBlade{G2}) where {G1,G2}
-    1 - 2 * parity(sortperm(SVector{G1+G2, Int}(indices(x)..., indices(y)...)))
-end
+Base.sign(op, x::UnitBlade, y::UnitBlade) = sign(op, indices(x), indices(y))
+
+Base.sign(::typeof(∧), i::AbstractVector{<:Integer}, j::AbstractVector{<:Integer}) =
+    1 - 2 * parity(sortperm(SVector{length(i) + length(j),Int}(vcat(i, j))))
+Base.sign(::typeof(⋅), i::AbstractVector{<:Integer}, j::AbstractVector{<:Integer}) = sign(∧, i, j)
+Base.sign(::typeof(*), i::AbstractVector{<:Integer}, j::AbstractVector{<:Integer}) = sign(∧, i, j)
+
 
 """
 Return the grade(s) that can be present in the result of an operation.
