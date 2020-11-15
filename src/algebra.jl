@@ -20,5 +20,5 @@ function GeomAlgebra(sig::Signature)
     GeomAlgebra(metric, sig)
 end
 
-Base.show(io::IO, sig::Signature) = print(io, "<", "+"^sig.positive, "-"^sig.negative, "0"^sig.degenerate, ">")
+Base.show(io::IO, sig::Signature) = print(io, "<", "+"^sig.positive, "-"^sig.negative, "𝟎"^sig.degenerate, ">")
 Base.show(io::IO, ga::GeomAlgebra) = print(io, "GA ", ga.sig)
