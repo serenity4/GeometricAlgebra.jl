@@ -97,9 +97,8 @@ Base.sign(::typeof(*), i::AbstractVector{<:Integer}, j::AbstractVector{<:Integer
 """
 Return the grade(s) that can be present in the result of an operation.
 """
-result_grade(::typeof(|), grade_a, grade_b) = abs(grade_a - grade_b)
+result_grade(::typeof(⋅), grade_a, grade_b) = abs(grade_a - grade_b)
 result_grade(::typeof(∧), grade_a, grade_b) = grade_a + grade_b
 result_grade(::typeof(lcontract), grade_a, grade_b) = grade_b - grade_a
 result_grade(::typeof(rcontract), grade_a, grade_b) = grade_a - grade_b
 result_grade(::typeof(*), grade_a, grade_b) = result_grade(|, grade_a, grade_b):result_grade(∧, grade_a, grade_b)
-result_grade(::typeof(⋅), grade_a, grade_b) = result_grade(|, grade_a, grade_b):result_grade(∧, grade_a, grade_b)
