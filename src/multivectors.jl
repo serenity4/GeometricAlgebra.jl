@@ -2,13 +2,13 @@
 Linear combination of blades, forming a general multivector.
 Coefficients are stored per-grade in contiguous arrays to allow fast access.
 """
-struct Multivector{T,V<:AbstractVector{<:Blade{<:UnitBlade,T}}}
+struct Multivector{S,T,V<:AbstractVector{<:Blade{S,<:UnitBlade,T}}}
     blades::V
 end
 Multivector(blades::Vector{<:Blade}) = Multivector(SVector{length(blades)}(blades))
 Multivector(blades::Blade...) = Multivector(collect(blades))
 
-function Multivector(mv::Multivector{T,V}, b::Blade{<:UnitBlade{S,G,I},T}) where {S,G,I,T,V}
+function Multivector(mv::Multivector{S,T,V}, b::Blade{S,<:UnitBlade{S,G,I},T}) where {S,G,I,T,V}
     inds = indices(mv)
     if I ∈ inds
         v = V(map((x, i) -> (i == I ? x + b : x), mv.blades, inds))

@@ -1,12 +1,15 @@
+abstract type BladeLike{S} end
+
 """
     UnitBlade{G,I}
 
 Unit blade with grade `G` and indices `I`, following a [`GeomAlgebra`](@ref) `S`.
 """
-struct UnitBlade{S,G,I} end
+struct UnitBlade{S,G,I} <: BladeLike{S} end
 UnitBlade(inds::AbstractVector{<:Integer}, sig::Signature = Ø) = UnitBlade{sig, length(inds), inds}()
 
 signature(::UnitBlade{S}) where {S} = S
+unit_scalar(sig) = UnitBlade{sig, 0, ()}()
 
 """
     Blade{B,T}
@@ -14,11 +17,15 @@ signature(::UnitBlade{S}) where {S} = S
 Blade living in the subspace spanned by `B`, with a coefficient of type `T`.
 Can be interpreted as a scaled version of a [`UnitBlade`](@ref).
 """
-struct Blade{B<:UnitBlade,T}
+struct Blade{S,B<:UnitBlade{S},T} <: BladeLike{S}
     coef::T
     unit_blade::B
 end
 
+const 𝟎 = Blade(0, UnitBlade{nothing, nothing, nothing}())
+const Zero = typeof(𝟎)
+
+scalar(coef, sig) = Blade(coef, unit_scalar(sig))
 grade(b::UnitBlade{S,G}) where {S,G} = G
 grade(b::Blade) = grade(b.unit_blade)
 
@@ -28,6 +35,10 @@ indices(b::Blade) = indices(b.unit_blade)
 grade_index(i::Integer...; dim) = grade_index(dim, collect(i))
 grade_index(dim, b::UnitBlade{S,G,I}) where {S,G,I} = grade_index(dim, I)
 grade_index(dim, b::Blade) = grade_index(dim, b.unit_blade)
+
+metric(::Signature{P,N,D}, ::Val{I}, ::Val{I}) where {P,N,D,I} = I <= P ? 1 : I <= P + N ? -1 : 0
+metric(::Signature, ::Val{I}, ::Val{J}) where {I,J} = 0
+metric(::UnitBlade{S,1,I}, ::UnitBlade{S,1,J}) where {S,I,J} = metric(S, Val(I[1]), Val(J[1]))
 
 """
     `grade_index(dim, i)`
@@ -73,34 +84,5 @@ function subscript(val)
 end
 
 Base.show(io::IO, b::UnitBlade{S,G,I}) where {S,G,I} = print(io, "v$(join(map(subscript, I)))")
-Base.show(io::IO, b::Blade{<:UnitBlade{S,G,I}}) where {S,G,I} = print(io, "$(b.coef)", string(b.unit_blade))
-
-"""
-    @basis [mod=Main, prefix=:v, signature="Ø"] <dim>
-Pull in all unit blade symbols from a `dim`-dimensional geometric algebra with a given `signature`.
-The symbols are evaluated inside the module `mod`, prefixed with `prefix`.
-"""
-macro basis(mod, prefix, sig, dim)
-    @assert dim isa Integer "Only numbers are supported for the dimension argument (received $dim)"
-    prefix isa QuoteNode ? prefix = prefix.value : nothing
-    @assert prefix isa Symbol "Only symbols are supported for the second argument (received $prefix)"
-    if sig ∈ ["Ø", ""]
-        sig = Ø
-    else
-        sig = Signature(count.(["+", "-", "𝟎"], Ref(sig))...)
-        @assert dimension(sig) > 0 "Invalid zero-dimensional signature $sig"
-    end
-    ub = vcat(collect.(unit_blades(dim, sig))...)
-    names = map(x -> Symbol(prefix, join(string.(indices(x)))), ub)
-    exprs = map((x, y) -> :($x = $y), names, ub)
-    quote
-        for (b, name, expr) ∈ zip($ub, $names, $exprs)
-            Base.eval($(esc(mod)), expr)
-        end
-        $ub
-    end
-end
-
-macro basis(prefix, sig, dim) :(@basis($(esc(Main)), $prefix, $sig, $dim)) end
-macro basis(sig, dim) :(@basis(:v, $sig, $dim)) end
-macro basis(dim) :(@basis("Ø", $dim)) end
+Base.show(io::IO, b::Blade{S,<:UnitBlade{S,G,I}}) where {S,G,I} = print(io, "$(b.coef)", string(b.unit_blade))
+Base.show(io::IO, ::Zero) = print(io, '𝟎')

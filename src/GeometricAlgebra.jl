@@ -4,7 +4,12 @@ using StaticArrays
 using IterTools
 using Combinatorics
 
+import Base: *, +, -, /
+
+include("utils.jl")
 include("signatures.jl")
+include("blades.jl")
+include("basis.jl")
 include("multivectors.jl")
 include("operators.jl")
 
@@ -16,6 +21,7 @@ export
     unit_blades, unit_blades_from_grade,
     @basis,
     signature,
+    𝟎,
 
     # multivectors
     Multivector,
@@ -26,8 +32,6 @@ export
     ∧, ⋅,
     lcontract, rcontract,
     grade_els,
-    Zero,
-    𝟎,
 
     # signatures
     Ø,
