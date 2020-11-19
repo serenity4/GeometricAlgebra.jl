@@ -1,6 +1,5 @@
 """
 Linear combination of blades, forming a general multivector.
-Coefficients are stored per-grade in contiguous arrays to allow fast access.
 """
 struct Multivector{S,T,V<:AbstractVector{<:Blade{S,<:UnitBlade,T}}}
     blades::V
@@ -26,7 +25,7 @@ function getindex!(mv::Multivector{T}, i...) where {T}
 end
 
 """
-Return true if all the `Multivector` instance only contains element of a single grade.
+Whether the `mv` only contains elements of a single grade.
 """
 is_homogeneous(mv::Multivector) = length(unique(grade.(mv.blades))) == 1
 
