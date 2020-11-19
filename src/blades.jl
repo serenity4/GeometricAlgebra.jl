@@ -6,10 +6,10 @@ abstract type BladeLike{S} end
 Unit blade with grade `G` and indices `I`, following a [`GeomAlgebra`](@ref) `S`.
 """
 struct UnitBlade{S,G,I} <: BladeLike{S} end
-UnitBlade(inds::AbstractVector{<:Integer}, sig::Signature = Ø) = UnitBlade{sig, length(inds), inds}()
+UnitBlade(inds, sig::Signature = Ø) = UnitBlade{sig, length(inds), inds}()
 
 signature(::UnitBlade{S}) where {S} = S
-unit_scalar(sig) = UnitBlade{sig, 0, ()}()
+unit_scalar(sig) = UnitBlade(SVector{0,Int}(), sig)
 
 """
     Blade{B,T}
@@ -29,16 +29,23 @@ scalar(coef, sig) = Blade(coef, unit_scalar(sig))
 grade(b::UnitBlade{S,G}) where {S,G} = G
 grade(b::Blade) = grade(b.unit_blade)
 
+unit_blade(::Type{<:Blade{S,B}}) where {S,B} = B
+
 indices(b::UnitBlade{S,G,I}) where {S,G,I} = I
 indices(b::Blade) = indices(b.unit_blade)
+indices(b::Type{<:Blade{S,<:UnitBlade{S,G,I}}}) where {S,G,I} = I
+indices(b::Type{<:UnitBlade{S,G,I}}) where {S,G,I} = I
 
 grade_index(i::Integer...; dim) = grade_index(dim, collect(i))
 grade_index(dim, b::UnitBlade{S,G,I}) where {S,G,I} = grade_index(dim, I)
 grade_index(dim, b::Blade) = grade_index(dim, b.unit_blade)
 
-metric(::Signature{P,N,D}, ::Val{I}, ::Val{I}) where {P,N,D,I} = I <= P ? 1 : I <= P + N ? -1 : 0
+metric(::Signature{P,N,D}, ::Val{I}) where {P,N,D,I} = I <= P ? 1 : I <= P + N ? -1 : 0
+metric(sig::Signature{P,N,D}, i::Val{I}, j::Val{I}) where {P,N,D,I} = metric(sig, i)
 metric(::Signature, ::Val{I}, ::Val{J}) where {I,J} = 0
-metric(::UnitBlade{S,1,I}, ::UnitBlade{S,1,J}) where {S,I,J} = metric(S, Val(I[1]), Val(J[1]))
+metric(::Type{<:UnitBlade{S,1,I}}, ::Type{UnitBlade{S,1,J}}) where {S,I,J} = metric(S, Val(I[1]), Val(J[1]))
+
+grade_els(b::Blade{S,<:UnitBlade{S,G}}, g) where {S,G} = g == G ? b : 𝟎
 
 """
     `grade_index(dim, i)`

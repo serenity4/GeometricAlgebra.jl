@@ -8,16 +8,6 @@ end
 Multivector(blades::Vector{<:Blade}) = Multivector(SVector{length(blades)}(blades))
 Multivector(blades::Blade...) = Multivector(collect(blades))
 
-function Multivector(mv::Multivector{S,T,V}, b::Blade{S,<:UnitBlade{S,G,I},T}) where {S,G,I,T,V}
-    inds = indices(mv)
-    if I ∈ inds
-        v = V(map((x, i) -> (i == I ? x + b : x), mv.blades, inds))
-    else
-        v = V(vcat(mv.blades, b))
-    end
-    Multivector(v)
-end
-
 """
 Return the blades of grade `g` from a `Multivector`.
 """
@@ -39,3 +29,5 @@ end
 Return true if all the `Multivector` instance only contains element of a single grade.
 """
 is_homogeneous(mv::Multivector) = length(unique(grade.(mv.blades))) == 1
+
+Base.show(io::IO, mv::Multivector) = print(io, join(string.(mv.blades), " + "))

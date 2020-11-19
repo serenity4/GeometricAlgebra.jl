@@ -11,6 +11,7 @@ include("signatures.jl")
 include("blades.jl")
 include("basis.jl")
 include("multivectors.jl")
+include("conversions.jl")
 include("operators.jl")
 
 export
