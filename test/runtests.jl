@@ -3,7 +3,6 @@ using StaticArrays
 using Test
 
 include("definitions.jl")
-include("promotion.jl")
 include("basis.jl")
 include("blades.jl")
 include("grades.jl")
