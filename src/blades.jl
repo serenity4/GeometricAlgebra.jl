@@ -1,9 +1,9 @@
 abstract type BladeLike{S} end
 
 """
-    UnitBlade{G,I}
+    UnitBlade{S,G,I}
 
-Unit blade with grade `G` and indices `I`, following a [`GeomAlgebra`](@ref) `S`.
+Unit blade with grade `G`, indices `I`, and [`Signature`](@ref) `S`.
 """
 struct UnitBlade{S,G,I} <: BladeLike{S} end
 UnitBlade(inds, sig::Signature = Ø) = UnitBlade{sig, length(inds), inds}()
