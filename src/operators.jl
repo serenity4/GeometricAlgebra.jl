@@ -75,6 +75,8 @@ end
 apply_operation(op, x, y) = grade_els(apply_operation(*, x, y), result_grade(op, grade(x), grade(y)))
 
 @associative (*)(x, y::BladeLike) = apply_operation(*, promote(x, y)...)
+@associative (*)(x::Number, y::B) where {B<:Blade} = B(x * y.coef, y.unit_blade)
+@associative (*)(x::Number, y::UnitBlade) = Blade(x, y)
 (*)(x::BladeLike, y::BladeLike) = apply_operation(*, x, y)
 
 for op ∈ [:∧, :⋅, :*]
