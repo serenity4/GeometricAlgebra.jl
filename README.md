@@ -1,5 +1,7 @@
 # GeometricAlgebra
 
+[![](https://img.shields.io/badge/docs-stable-blue.svg)](https://serenity4.github.io/GeometricAlgebra.jl/stable) [![](https://img.shields.io/badge/docs-dev-blue.svg)](https://serenity4.github.io/GeometricAlgebra.jl/dev)
+
 Geometric Algebra (GA) library. Currently in heavy development.
 
 ## About GA
