@@ -1,33 +1,87 @@
 using GeometricAlgebra
-using BenchmarkTools
+using DataStructures
+using MacroTools: postwalk, prewalk, @capture
+import BenchmarkTools
 import Grassmann
 
-packages = ["GeometricAlgebra", "Grassmann"]
+include("printing.jl")
+include("utils.jl")
 
-suite = BenchmarkGroup(packages)
+function run_benchmark(name, expr::Expr, level)
+    indent_level = level * 2
+    result = @eval @localbenchmark $expr
+    replprint(string(minimum(result)), newline=1, prefix=name * ": "; indent_level)
+end
 
-@basis v "+++" 3
+function run_benchmark(name, group, level)
+    indent_level = level * 2
+    replprint(name; indent_level, newline=1, bold=true, color=color_levels[level])
+    for (k, v) ∈ group
+        run_benchmark(k, v, level + 1)
+    end
+end
 
-package = "GeometricAlgebra"
-suite[package] = BenchmarkGroup()
-suite[package]["geometric_product"] = BenchmarkGroup()
-suite[package]["geometric_product"]["5v1 + 5v1"] = @benchmarkable Ref(5*$v1)[] * Ref(5*$v1)[]
-suite[package]["geometric_product"]["5v1 + 5v2"] = @benchmarkable Ref(5*$v1)[] * Ref(5*$v2)[]
-suite[package]["addition"] = BenchmarkGroup()
-suite[package]["addition"]["5v1 + 5v2"] = @benchmarkable Ref(5*$v1)[] + Ref(5*$v2)[]
-suite[package]["mixed"] = BenchmarkGroup()
-suite[package]["mixed"]["(5v1 + 3v3 + 1v12) * 5v2"] = @benchmarkable Ref(5*$v1 + 3*$v3 + 1*$v12)[] * Ref(5*$v2)[]
+function run_benchmarks(suite)
+    replprint("Benchmarking geometric algebras", newline=1, color=:yellow)
 
-Grassmann.@basis "+++" G v
+    ga_suite = prepare_suite!(deepcopy(suite))
+    grassmann_suite = prepare_suite!(deepcopy(suite); grassmann=true)
 
-package = "Grassmann"
-suite[package] = BenchmarkGroup(["geometric_product", "addition", "mixed"])
-suite[package]["geometric_product"] = BenchmarkGroup()
-suite[package]["geometric_product"]["5v1 + 5v1"] = @benchmarkable Ref(5*$v1)[] * Ref(5*$v1)[]
-suite[package]["geometric_product"]["5v1 + 5v2"] = @benchmarkable Ref(5*$v1)[] * Ref(5*$v2)[]
-suite[package]["addition"] = BenchmarkGroup()
-suite[package]["addition"]["5v1 + 5v2"] = @benchmarkable Ref(5*$v1)[] + Ref(5*$v2)[]
-suite[package]["mixed"] = BenchmarkGroup()
-suite[package]["mixed"]["(5v1 + 3v3 + 1v12) * 5v2"] = @benchmarkable Ref(5*$v1 + 3*$v3 + 1*$v12)[] * Ref(5*$v2)[]
+    run_benchmark("GeometricAlgebra", ga_suite, 1)
+    run_benchmark("Grassmann", grassmann_suite, 1)
+end
 
-println(run(suite))
+function prepare_suite!(suite; grassmann=false)
+    for (k, v) ∈ suite
+        if v isa Expr
+            if grassmann
+                suite[k] = postwalk(suite[k]) do x
+                    if is_blade_symbol(x)
+                        Symbol(replace(string(x), r"^v" => "g"))
+                    else
+                        x
+                    end
+                end
+            end
+        else
+            prepare_suite!(v; grassmann)
+        end
+    end
+    suite
+end
+
+is_blade_symbol(x) = x isa Symbol && startswith(string(x), r"v\d+")
+
+make_suite(base) = make_suite!(OrderedDict(), base)
+
+function make_suite!(suite, base)
+    res = DefaultOrderedDict(() -> OrderedDict())
+    for (k, v) ∈ base
+        if v isa Vector{Expr}
+            res[k] = OrderedDict(string.(v) .=> v)
+        else
+            res[k] = make_suite(v)
+        end
+    end
+    res
+end
+
+color_levels = [:red, :cyan]
+
+@basis "+++"
+Grassmann.@basis "+++" G g
+
+suite_base = DefaultOrderedDict(() -> OrderedDict())
+suite_base["Geometric product"] = [
+    :(5v1 * 5v2),
+]
+suite_base["Addition"] = [
+    :(5v1 + 5v2),
+]
+suite_base["Mixed"]= [
+    :((5v1 + 3v3 + 1v12) * 5v2),
+]
+
+suite = make_suite(suite_base)
+
+run_benchmarks(suite)
