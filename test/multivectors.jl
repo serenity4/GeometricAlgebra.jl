@@ -5,4 +5,8 @@
     @test is_homogeneous(mv_1)
     @test grade(mv_1) == 1
     @test grade(mv_2) == 3
+    @test mv_1[1] == 1v1
+    @test mv_1[2] == 1v2
+    @test mv_2[1,2] == 1v12
+    @test mv_2[1,2,3] == 1v123
 end

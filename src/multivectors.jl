@@ -17,11 +17,12 @@ indices(mv::Multivector) = indices.(mv.blades)
 """
 Get `Blade` element with index `(i, j)`.
 """
-function getindex!(mv::Multivector{T}, i...) where {T}
+function Base.getindex(mv::Multivector{S,T}, i::Integer...) where {S,T}
+    i = SVector{length(i)}(i)
     for blade ∈ mv.blades
         indices(blade) == i && return blade
     end
-    Blade(zero(T), UnitBlade{i}())
+    Blade(zero(T), UnitBlade(i, S))
 end
 
 """
