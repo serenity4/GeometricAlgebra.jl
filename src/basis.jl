@@ -33,7 +33,7 @@ macro basis(prefix, sig::AbstractString)
 
     quote
         $(esc.(exprs)...)
-        $ublades
+        $(Dict(names .=> ublades))
     end
 end
 
