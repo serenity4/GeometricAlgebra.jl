@@ -1,7 +1,7 @@
 module TestModule
     using GeometricAlgebra
 
-    @basis g "++-" 3
+    @basis g "++-"
 end
 
 @testset "Basis macro" begin

@@ -1,6 +1,6 @@
 dim = 3
 
-@basis "++-" 3
+@basis "++-"
 
 sig = Signature(2, 1, 0)
 sig_2 = Signature(1, 1, 1)
