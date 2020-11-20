@@ -1,6 +1,8 @@
-module TestModule end
+module TestModule
+    using GeometricAlgebra
 
-@basis TestModule g "++-" 3
+    @basis g "++-" 3
+end
 
 @testset "Basis macro" begin
     @test isdefined(TestModule, :g)

@@ -1,10 +1,20 @@
 """
-    @basis [mod=Main, prefix=:v, signature="Ø"] <dim>
-Pull in all unit blade symbols from a `dim`-dimensional geometric algebra with a given `signature`.
-The symbols are evaluated inside the module `mod`, prefixed with `prefix`.
+    @basis [prefix=:v, signature="Ø"] <dim>
+
+Pull all unit blade symbols from a `dim`-dimensional geometric algebra with a given `signature` in the local scope.
+
+## Examples
+
+```julia
+julia> @basis 3 # no signature
+
+julia> @basis "+++" 3 # v is the default prefix
+
+julia> @basis g "+++" 3 # assigned variables will be g, g1, g12...
+```
+
 """
-macro basis(mod, prefix, sig, dim)
-    @assert dim isa Integer "Only numbers are supported for the dimension argument (received $dim)"
+macro basis(prefix, sig::AbstractString, dim::Integer)
     prefix isa QuoteNode ? prefix = prefix.value : nothing
     @assert prefix isa Symbol "Only symbols are supported for the second argument (received $prefix)"
     if sig ∈ ["Ø", ""]
@@ -13,17 +23,15 @@ macro basis(mod, prefix, sig, dim)
         sig = Signature(count.(["+", "-", "𝟎"], Ref(sig))...)
         @assert dimension(sig) > 0 "Invalid zero-dimensional signature $sig"
     end
-    ub = vcat(collect.(unit_blades(dim, sig))...)
-    names = map(x -> Symbol(prefix, join(string.(indices(x)))), ub)
-    exprs = map((x, y) -> :($x = $y), names, ub)
+    ublades = vcat(collect.(unit_blades(dim, sig))...)
+    names = map(x -> Symbol(prefix, join(string.(indices(x)))), ublades)
+    exprs = map((x, y) -> :($x = $y), names, ublades)
+
     quote
-        for (b, name, expr) ∈ zip($ub, $names, $exprs)
-            Base.eval($(esc(mod)), expr)
-        end
-        $ub
+        $(esc.(exprs)...)
+        $ublades
     end
 end
 
-macro basis(prefix, sig, dim) :(@basis($(esc(Main)), $prefix, $sig, $dim)) end
-macro basis(sig, dim) :(@basis(:v, $sig, $dim)) end
-macro basis(dim) :(@basis("Ø", $dim)) end
+macro basis(sig::AbstractString, dim::Integer) esc(:(@basis(:v, $sig, $dim))) end
+macro basis(dim::Integer) esc(:(@basis("Ø", $dim))) end
