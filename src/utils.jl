@@ -1,5 +1,5 @@
 """
-    `@associative 2 3 f(op, x::Type1, y::Type2) = ...`
+    @associative 2 3 f(op, x::Type1, y::Type2) = ...
 
 Wrap a method definition, resulting in the definition of another method
 which uses the first when x and y are swapped.

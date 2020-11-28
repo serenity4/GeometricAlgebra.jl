@@ -48,7 +48,7 @@ metric(::Type{<:UnitBlade{S,1,I}}, ::Type{UnitBlade{S,1,J}}) where {S,I,J} = met
 grade_els(b::Blade{S,<:UnitBlade{S,G}}, g) where {S,G} = g == G ? b : 𝟎
 
 """
-    `grade_index(dim, i)`
+    grade_index(dim, i)
 Return the grade index of `i`.
 
 ## Example

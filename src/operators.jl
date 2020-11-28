@@ -26,25 +26,25 @@ end
 (-)(x::Multivector) = Multivector(map(-, x.blades))
 
 """
-    `x ∧ y`
+    x ∧ y
 Outer product of `x` with `y`.
 """
 function ∧ end
 
 """
-    `x ⋅ y`
+    x ⋅ y
 Inner product of `x` with `y`.
 """
 function ⋅ end
 
 """
-    `lcontract(x, y)`
+    lcontract(x, y)
 Left contraction of `x` with `y`.
 """
 function lcontract end
 
 """
-    `rcontract(x, y)`
+    rcontract(x, y)
 Right contraction of `x` with `y`.
 """
 function rcontract end
