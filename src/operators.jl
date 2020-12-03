@@ -2,28 +2,31 @@
     Blade(x.coef + y.coef, x.unit_blade)
 @associative (+)(x::Blade, y::Zero) = x
 
-function (+)(x::Blade, y::Blade)
-    Multivector(@SVector([x, y]))
+@generated function materialize(::Type{Blade{S,B,T}}) where {S,B,T}
+    n = 2^dimension(S)
+    SVector{n, T}(zeros(T, n))
 end
 
-@associative function (+)(x::Multivector{S,T,V}, y::Blade{S,<:UnitBlade{S,G,I},T}) where {S,G,I,T,V}
-    inds = indices(x)
-    blades = if I ∈ inds
-        map((x, i) -> (i == I ? x + y : x), x.blades, inds)
-    else
-        vcat(x.blades, y)
-    end
-
-    Multivector(SVector{length(blades)}(blades))
+function (+)(x::Blade{S,<:UnitBlade{S,G1,I1},T}, y::Blade{S,<:UnitBlade{S,G2,I2},T}) where {S,G1,G2,I1,I2,T}
+    coefs = materialize(typeof(x))
+    coefs_x = setindex(coefs, x.coef, linear_index(x))
+    Multivector{S}(setindex(coefs_x, y.coef, linear_index(y)))
 end
 
-(+)(x::Multivector, y::Multivector) = foldl(+, Ref(x), blades(y))
-(+)(x::UnitBlade, y::UnitBlade) = Multivector(SVector{2}(1x, 1y))
+@associative function (+)(x::Multivector{S}, y::Blade{S}) where {S}
+    dim = dimension(S)
+    index = linear_index(y)
+    coefs = setindex(x.coefs, x.coefs[index] + y.coef, index)
+    Multivector{S}(coefs)
+end
+
+(+)(x::Multivector{S}, y::Multivector{S}) where {S} = Multivector{S}(x.coefs .+ y.coefs)
+(+)(x::UnitBlade, y::UnitBlade) = 1x + 1y
 
 (-)(x::Blade) = Blade(-x.coef, x.unit_blade)
 (-)(x::Blade, y::Blade) = x + (-y)
 @associative (-)(x::Blade, y::Multivector) = x + (-y)
-(-)(x::Multivector) = Multivector(map(-, x.blades))
+(-)(x::Multivector{S}) where {S} = Multivector{S}(map(-, x.coefs))
 
 """
     x ∧ y
@@ -72,17 +75,20 @@ function apply_operation(::typeof(*), x::Blade, y::Blade)
     Blade(s * ρ, vec)
 end
 
-apply_operation(op, x, y) = grade_els(apply_operation(*, x, y), result_grade(op, grade(x), grade(y)))
+Base.sum(blades::AbstractVector{<:Blade{S,<:Any,T}}) where {S,T} = foldl(+, blades)
 
 @associative (*)(x, y::BladeLike) = apply_operation(*, promote(x, y)...)
 @associative (*)(x::Number, y::B) where {B<:Blade} = B(x * y.coef, y.unit_blade)
 @associative (*)(x::Number, y::UnitBlade) = Blade(x, y)
+@associative (*)(x::Multivector, y::Blade) = sum(blades(x) .* y)
 (*)(x::BladeLike, y::BladeLike) = apply_operation(*, x, y)
 
 for op ∈ [:∧, :⋅, :*]
     @eval begin
 
         if $op ∈ [∧, ⋅] # define methods to behave like other operators
+            apply_operation(::typeof($op), x, y) = grade_els(apply_operation(*, x, y), result_grade($op, grade(x), grade(y)))
+
             ($op)(x, y...) = foldl(∧, vcat(x, y...))
             ($op)(x::Blade, y::Blade) = apply_operation($op, x, y)
             ($op)(x::UnitBlade, y::UnitBlade) = apply_operation($op, x, y)
@@ -91,8 +97,8 @@ for op ∈ [:∧, :⋅, :*]
         
         @associative 2 3 apply_operation(::typeof($op), x::Blade{S,<:UnitBlade{S,0,()}}, y::Blade{S}) where {S} =
             Blade(x.coef * y.coef, y.unit_blade)
-        apply_operation(::typeof($op), x::Multivector, y::Multivector) = sum($op(bx, by) for bx ∈ x.blades, by ∈ y.blades)
-        
+        apply_operation(::typeof($op), x::Multivector, y::Multivector) = sum($op(bx, by) for bx ∈ blades(x), by ∈ blades(y))
+
         ($op)(x::Multivector, y::Multivector) = apply_operation($op, x, y)
 
     end

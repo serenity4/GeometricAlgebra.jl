@@ -3,13 +3,13 @@ Signature(positive, negative, degenerate=0) = Signature{positive, negative, dege
 
 const Ø = Signature{0,0,0}()
 
-positive(::Signature{P}) where {P} = P
+@generated positive(::Signature{P}) where {P} = P
 
-negative(::Signature{P,N}) where {P,N} = N
+@generated negative(::Signature{P,N}) where {P,N} = N
 
-degenerate(::Signature{P,N,D}) where {P,N,D} = D
+@generated degenerate(::Signature{P,N,D}) where {P,N,D} = D
 
-dimension(sig::Signature) = positive(sig) + negative(sig) + degenerate(sig)
+@generated dimension(::Signature{P,N,D}) where {P,N,D} = P + N + D
 
 is_degenerate(sig::Signature) = degenerate(sig) ≠ 0
 

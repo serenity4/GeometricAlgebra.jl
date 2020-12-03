@@ -19,9 +19,9 @@
     @test grade_index(3, v2) == 2
     @test grade_index(3, v12) == 1
 
-    @test grade_els(mv_1, 1) == [1v1, 1v2]
-    @test grade_els(mv_2, 1) == [1v1]
-    @test grade_els(mv_2, 2) == [1v12]
-    @test grade_els(mv_2, 3) == [1v123]
+    @test all(grade_els(mv_1, 1) .== [1v1, 1v2])
+    @test all(grade_els(mv_2, 1) .== [1v1])
+    @test all(grade_els(mv_2, 2) .== [1v12])
+    @test all(grade_els(mv_2, 3) .== [1v123])
     @test isempty(grade_els(mv_1, 2))
 end

@@ -1,5 +1,7 @@
 abstract type BladeLike{S} end
 
+Base.broadcastable(x::BladeLike) = Ref(x)
+
 """
     UnitBlade{S,G,I}
 
@@ -12,9 +14,9 @@ signature(::UnitBlade{S}) where {S} = S
 unit_scalar(sig) = UnitBlade(SVector{0,Int}(), sig)
 
 """
-    Blade{B,T}
+    Blade{S,B,T}
 
-Blade living in the subspace spanned by `B`, with a coefficient of type `T`.
+Blade living in the subspace spanned by `B` with signature `S` and a coefficient of type `T`.
 Can be interpreted as a scaled version of a [`UnitBlade`](@ref).
 """
 struct Blade{S,B<:UnitBlade{S},T} <: BladeLike{S}
@@ -43,9 +45,40 @@ grade_index(dim, b::Blade) = grade_index(dim, b.unit_blade)
 metric(::Signature{P,N,D}, ::Val{I}) where {P,N,D,I} = I <= P ? 1 : I <= P + N ? -1 : 0
 metric(sig::Signature{P,N,D}, i::Val{I}, j::Val{I}) where {P,N,D,I} = metric(sig, i)
 metric(::Signature, ::Val{I}, ::Val{J}) where {I,J} = 0
-metric(::Type{<:UnitBlade{S,1,I}}, ::Type{UnitBlade{S,1,J}}) where {S,I,J} = metric(S, Val(I[1]), Val(J[1]))
+metric(::Type{<:UnitBlade{S,1,I}}, ::Type{<:UnitBlade{S,1,J}}) where {S,I,J} = metric(S, Val.(first.((I, J)))...)
 
 grade_els(b::Blade{S,<:UnitBlade{S,G}}, g) where {S,G} = g == G ? b : 𝟎
+
+linear_index(::UnitBlade{S,G,I}) where {S,G,I} = linear_index(dimension(S), G, I)
+linear_index(b::Blade) = linear_index(b.unit_blade)
+
+function linear_index(dim, grade, indices)
+    grade_index(dim, indices) + sum(binomial.(dim, 0:(grade-1)))
+end
+
+function grade_from_linear_index(index, dim)
+    grade_end = 1
+    for g ∈ 0:dim
+        if grade_end >= index
+            return (g, grade_end)
+        else
+            grade_end += binomial(dim, g+1)
+        end
+    end
+    if grade_end >= index
+        (dim, grade_end)
+    else
+        error("Could not fetch linear index from $index with dimension $dim")
+    end
+end
+
+function indices_from_linear_index(index, dim)
+    grade, grade_end = grade_from_linear_index(index, dim)
+    grade_start = grade_end - binomial(dim, grade)
+    grade == 0 && return ()
+    cs = collect(combinations(1:dim, grade))
+    SVector{grade}(cs[index - grade_start])
+end
 
 """
     grade_index(dim, i)
@@ -56,14 +89,11 @@ Return the grade index of `i`.
 julia> grade_index(3, [1])
 1
 
-julia> grade_index(3, [1, 2])
-1
-
 julia> grade_index(3, [3, 1])
 3
 ```
 """
-function grade_index(dim, i::AbstractVector)
+function grade_index(dim, i)
     grade = length(i)
     if grade == 0
         1
@@ -77,7 +107,7 @@ function grade_index(dim, i::AbstractVector)
 end
 
 unit_blades_from_grade(dim, grade, sig::Signature) =
-    (UnitBlade(SVector{length(s)}(s), sig::Signature) for s ∈ subsets(1:dim, grade))
+    (UnitBlade(SVector{length(s)}(s), sig::Signature) for s ∈ combinations(1:dim, grade))
 
 unit_blades(dim::Integer, sig::Signature) = unit_blades_from_grade.(dim, 0:dim, sig::Signature)
 
