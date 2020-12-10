@@ -25,6 +25,8 @@ struct Blade{S,B<:UnitBlade{S},T} <: BladeLike{S}
     unit_blade::B
 end
 
+Blade(inds, sig::Signature, coef) = Blade(coef, UnitBlade(inds, sig))
+
 const 𝟎 = Blade(0, UnitBlade{nothing, nothing, nothing}())
 const Zero = typeof(𝟎)
 
