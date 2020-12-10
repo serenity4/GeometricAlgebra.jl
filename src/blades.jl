@@ -29,8 +29,13 @@ const 𝟎 = Blade(0, UnitBlade{nothing, nothing, nothing}())
 const Zero = typeof(𝟎)
 
 scalar(coef, sig) = Blade(coef, unit_scalar(sig))
+
 grade(b::UnitBlade{S,G}) where {S,G} = G
 grade(b::Blade) = grade(b.unit_blade)
+
+Base.eltype(::Blade{S,B,T}) where {S,B,T} = T
+
+signature(::Blade{S}) where {S} = S
 
 unit_blade(::Type{<:Blade{S,B}}) where {S,B} = B
 

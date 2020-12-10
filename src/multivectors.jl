@@ -9,11 +9,17 @@ end
 Multivector{S}(coefs) where {S} = Multivector{S}(SVector{length(coefs),eltype(coefs)}(coefs))
 Multivector{S}(coefs::T...) where {S,T<:Number} = Multivector{S}(collect(coefs))
 
+grade(mv::Multivector) = maximum(grade.(blades(mv)))
+
 """
 Return the blades of grade `g` from a `Multivector`.
 """
 grade_els(mv::Multivector, g) = filter(x -> grade(x) == g, blades(mv))
-grade(mv::Multivector) = maximum(grade.(blades(mv)))
+
+signature(::Multivector{S}) where {S} = S
+
+Base.eltype(::Multivector{S,T}) where {S,T} = T
+
 indices(mv::Multivector) = indices.(blades(mv))
 
 function blades(mv::Multivector{S,T}) where {S,T}
