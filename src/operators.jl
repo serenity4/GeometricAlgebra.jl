@@ -1,14 +1,15 @@
 (+)(x::Blade{S,<:UnitBlade{S,G,I}}, y::Blade{S,<:UnitBlade{S,G,I}}) where {S,G,I} =
-    Blade(x.coef + y.coef, x.unit_blade)
+    Blade(convert(promote_type(eltype(x), eltype(y)), x.coef + y.coef), x.unit_blade)
 @associative (+)(x::Blade, y::Zero) = x
+(+)(::Zero, ::Zero) = 𝟎
 
-@generated function materialize(::Type{Blade{S,B,T}}) where {S,B,T}
+@generated function materialize(::Type{<:Blade{S}}, ::Type{T}) where {S,T}
     n = 2^dimension(S)
     SVector{n, T}(zeros(T, n))
 end
 
-function (+)(x::Blade{S,<:UnitBlade{S,G1,I1},T}, y::Blade{S,<:UnitBlade{S,G2,I2},T}) where {S,G1,G2,I1,I2,T}
-    coefs = materialize(typeof(x))
+function (+)(x::Blade{S,<:UnitBlade{S,G1,I1}}, y::Blade{S,<:UnitBlade{S,G2,I2}}) where {S,G1,G2,I1,I2}
+    coefs = materialize(typeof(x), promote_type(eltype(x), eltype(y)))
     coefs_x = setindex(coefs, x.coef, linear_index(x))
     Multivector{S}(setindex(coefs_x, y.coef, linear_index(y)))
 end
