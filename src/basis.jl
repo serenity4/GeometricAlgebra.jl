@@ -33,6 +33,7 @@ macro basis(prefix, sig::AbstractString)
 
     quote
         $(esc.(exprs)...)
+        $(esc(:(MV = Multivector{$sig})))
         $(Dict(names .=> ublades))
     end
 end
