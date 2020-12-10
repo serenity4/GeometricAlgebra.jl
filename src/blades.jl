@@ -27,8 +27,8 @@ end
 
 Blade(inds, sig::Signature, coef) = Blade(coef, UnitBlade(inds, sig))
 
-const 𝟎 = Blade(0, UnitBlade{nothing, nothing, nothing}())
-const Zero = typeof(𝟎)
+struct Zero end
+const 𝟎 = Zero()
 
 scalar(coef, sig) = Blade(coef, unit_scalar(sig))
 
