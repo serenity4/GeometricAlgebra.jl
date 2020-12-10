@@ -20,6 +20,8 @@ signature(::Multivector{S}) where {S} = S
 
 Base.eltype(::Multivector{S,T}) where {S,T} = T
 
+Base.length(::Multivector{S,T,N}) where {S,T,N} = N
+
 indices(mv::Multivector) = indices.(blades(mv))
 
 function blades(mv::Multivector{S,T}) where {S,T}
