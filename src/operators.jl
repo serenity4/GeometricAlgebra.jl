@@ -1,7 +1,6 @@
 (+)(x::Blade{S,<:UnitBlade{S,G,I}}, y::Blade{S,<:UnitBlade{S,G,I}}) where {S,G,I} =
     Blade(convert(promote_type(eltype(x), eltype(y)), x.coef + y.coef), x.unit_blade)
 @associative (+)(x, y::Zero) = x
-(+)(::Zero, ::Zero) = 𝟎
 
 @generated function materialize(::Type{<:Blade{S}}, ::Type{T}) where {S,T}
     n = 2^dimension(S)
