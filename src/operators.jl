@@ -119,6 +119,13 @@ permsign(::typeof(*), x::Type{<:BladeLike}, y::Type{<:BladeLike}) = permsign(*, 
 permsign(::typeof(*), i, j) =
     1 - 2 * parity(sortperm(SVector{length(i) + length(j),Int}(vcat(i, j))))
 
+Base.reverse(b::Blade) = (-1)^(1 + grade(b)) * b
+Base.reverse(mv::Multivector) = sum(reverse.(blades(mv)))
+
+Base.inv(b::Blade{S,<:UnitBlade{S,0,()}}) where {S} = Blade(1/b.coef, b.unit_blade)
+Base.inv(b::Blade) = Blade(b.coef / (b*b).coef, b.unit_blade)
+Base.inv(mv::Multivector) = sum(inv.(blades(mv)))
+
 """
 Return the grade(s) that can be present in the result of an operation.
 """
