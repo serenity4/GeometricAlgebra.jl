@@ -8,7 +8,8 @@ Base.broadcastable(x::BladeLike) = Ref(x)
 Unit blade with grade `G`, indices `I`, and [`Signature`](@ref) `S`.
 """
 struct UnitBlade{S,G,I} <: BladeLike{S} end
-UnitBlade(inds, sig::Signature = Ø) = UnitBlade{sig, length(inds), inds}()
+UnitBlade(inds::SVector{N,T}, sig::Signature = Ø) where {N,T} = UnitBlade{sig, N, inds}()
+UnitBlade(inds::AbstractVector, sig::Signature = Ø) = UnitBlade(SVector{length(inds)}(inds), sig)
 
 signature(::UnitBlade{S}) where {S} = S
 unit_scalar(sig) = UnitBlade(SVector{0,Int}(), sig)
