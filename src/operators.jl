@@ -125,7 +125,7 @@ Base.reverse(b::Blade) = (-1)^(1 + grade(b)) * b
 Base.reverse(mv::Multivector) = sum(reverse.(blades(mv)))
 
 Base.inv(b::Blade{S,<:UnitBlade{S,0,()}}) where {S} = Blade(inv(b.coef), b.unit_blade)
-Base.inv(b::Blade) = Blade(b.coef / (b*b).coef, b.unit_blade)
+Base.inv(b::Blade) = Blade(b.coef / (reverse(b) * b).coef, b.unit_blade)
 Base.inv(mv::Multivector) = sum(inv.(blades(mv)))
 
 """
