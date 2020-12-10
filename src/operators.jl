@@ -79,9 +79,11 @@ end
 Base.sum(blades::AbstractVector{<:Blade{S,<:Any,T}}) where {S,T} = foldl(+, blades)
 
 @associative (*)(x, y::BladeLike) = apply_operation(*, promote(x, y)...)
-@associative (*)(x::Number, y::B) where {B<:Blade} = B(x * y.coef, y.unit_blade)
+@associative (*)(x::Number, y::Blade) = typeof(y)(x * y.coef, y.unit_blade)
 @associative (*)(x::Number, y::UnitBlade) = Blade(x, y)
 @associative (*)(x::Multivector, y::Blade) = sum(blades(x) .* y)
+@associative (*)(x::Multivector{S}, y::Blade{S,<:UnitBlade{S,0,()}}) where {S} = Multivector{S, promote_type(eltype(x), eltype(y)), length(x)}(x.coefs .* y.coef)
+@associative (*)(x::Multivector, y::Number) where {S} = x * scalar(y, signature(x))
 (*)(x::BladeLike, y::BladeLike) = apply_operation(*, x, y)
 
 for op ∈ [:∧, :⋅, :*]
@@ -122,7 +124,7 @@ permsign(::typeof(*), i, j) =
 Base.reverse(b::Blade) = (-1)^(1 + grade(b)) * b
 Base.reverse(mv::Multivector) = sum(reverse.(blades(mv)))
 
-Base.inv(b::Blade{S,<:UnitBlade{S,0,()}}) where {S} = Blade(1/b.coef, b.unit_blade)
+Base.inv(b::Blade{S,<:UnitBlade{S,0,()}}) where {S} = Blade(inv(b.coef), b.unit_blade)
 Base.inv(b::Blade) = Blade(b.coef / (b*b).coef, b.unit_blade)
 Base.inv(mv::Multivector) = sum(inv.(blades(mv)))
 

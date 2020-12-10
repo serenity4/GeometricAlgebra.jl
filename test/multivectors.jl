@@ -10,4 +10,6 @@
     @test mv_1[2] == 1
     @test mv_2[1,2] == 1
     @test mv_2[1,2,3] == 1
+    @test 1.0f0v * (1v1 + 2v2) == 1.0f0v1 + 2.0f0v2
+    @test 1.0f0 * (1v1 + 2v2) == 1.0f0v1 + 2.0f0v2
 end
