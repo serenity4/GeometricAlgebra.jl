@@ -1,5 +1,7 @@
 struct Signature{P,N,D} end
-Signature(positive, negative, degenerate=0) = Signature{positive, negative, degenerate}()
+
+Signature(positive, negative=0, degenerate=0) = Signature{positive, negative, degenerate}()
+Signature(string::AbstractString) = Signature(count.(["+", "-", "𝟎"], Ref(string))...)
 
 const Ø = Signature{0,0,0}()
 

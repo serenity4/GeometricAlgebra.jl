@@ -22,7 +22,7 @@ macro basis(prefix, sig::AbstractString)
     prefix isa QuoteNode ? prefix = prefix.value : nothing
     @assert prefix isa Symbol "Only symbols are supported for the second argument (received $prefix)"
 
-    sig = Signature(count.(["+", "-", "𝟎"], Ref(sig))...)
+    sig = Signature(sig)
 
     dim = dimension(sig)
     @assert dim > 0 "Invalid zero-dimensional signature $sig"
