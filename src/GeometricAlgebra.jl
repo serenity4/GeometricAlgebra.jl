@@ -3,7 +3,6 @@ module GeometricAlgebra
 using StaticArrays
 using IterTools
 using Combinatorics
-using Base: Bottom
 
 import Base: *, +, -, /, ==
 
