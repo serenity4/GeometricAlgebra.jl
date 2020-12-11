@@ -2,6 +2,8 @@ using GeometricAlgebra
 using StaticArrays
 using Test
 
+const ga = GeometricAlgebra
+
 include("definitions.jl")
 include("signatures.jl")
 include("basis.jl")

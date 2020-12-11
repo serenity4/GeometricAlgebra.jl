@@ -1,10 +1,10 @@
 """
-    @associative 2 3 f(op, x::Type1, y::Type2) = ...
+    @type_commutative 2 3 f(op, x::Type1, y::Type2) = ...
 
 Wrap a method definition, resulting in the definition of another method
 which uses the first when x and y are swapped.
 """
-macro associative(ix, iy, expr)
+macro type_commutative(ix, iy, expr)
     additional_decl = deepcopy(expr)
     f_decl, f_body = additional_decl.args
     if f_decl.head == :where
@@ -25,4 +25,13 @@ macro associative(ix, iy, expr)
     end
 end
 
-macro associative(expr) :(@associative($nothing, $nothing, $expr)) end
+macro type_commutative(expr) :(@type_commutative($nothing, $nothing, $expr)) end
+
+"""
+Return `val` as a subscript, used for printing `UnitBlade` and `Blade` instances.
+"""
+function subscript(val)
+    r = div(val, 10)
+    subscript_char(x) = Char(8320 + x)
+    r > 0 ? string(subscript_char(r), subscript_char(mod(val, 10))) : string(subscript_char(val))
+end

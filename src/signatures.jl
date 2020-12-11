@@ -5,13 +5,13 @@ Signature(string::AbstractString) = Signature(count.(["+", "-", "𝟎"], Ref(str
 
 const Ø = Signature{0,0,0}()
 
-@generated positive(::Signature{P}) where {P} = P
+positive(::Signature{P}) where {P} = P
 
-@generated negative(::Signature{P,N}) where {P,N} = N
+negative(::Signature{P,N}) where {P,N} = N
 
-@generated degenerate(::Signature{P,N,D}) where {P,N,D} = D
+degenerate(::Signature{P,N,D}) where {P,N,D} = D
 
-@generated dimension(::Signature{P,N,D}) where {P,N,D} = P + N + D
+dimension(::Signature{P,N,D}) where {P,N,D} = P + N + D
 
 is_degenerate(sig::Signature) = degenerate(sig) ≠ 0
 

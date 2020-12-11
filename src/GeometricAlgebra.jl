@@ -3,8 +3,11 @@ module GeometricAlgebra
 using StaticArrays
 using IterTools
 using Combinatorics
+using Base: Bottom
 
-import Base: *, +, -, /
+import Base: *, +, -, /, ==
+
+abstract type GeometricAlgebraType end
 
 include("utils.jl")
 include("signatures.jl")
@@ -32,7 +35,7 @@ export
     # operators
     ∧, ⋅,
     lcontract, rcontract,
-    grade_els,
+    grade_projection,
 
     # signatures
     Ø,

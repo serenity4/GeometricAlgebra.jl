@@ -19,9 +19,9 @@
     @test grade_index(3, v2) == 2
     @test grade_index(3, v12) == 1
 
-    @test all(grade_els(mv_1, 1) .== [1v1, 1v2])
-    @test all(grade_els(mv_2, 1) .== [1v1])
-    @test all(grade_els(mv_2, 2) .== [1v12])
-    @test all(grade_els(mv_2, 3) .== [1v123])
-    @test isempty(grade_els(mv_1, 2))
+    @test grade_projection(mv_1, 1) == 1v1 + 1v2
+    @test grade_projection(mv_2, 1) == convert(MV, 1v1)
+    @test grade_projection(mv_2, 2) == convert(MV, 1v12)
+    @test grade_projection(mv_2, 3) == convert(MV, 1v123)
+    @test grade_projection(mv_1, 2) == zeros(MV)
 end

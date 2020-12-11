@@ -1,4 +1,4 @@
-abstract type BladeLike{S} end
+abstract type BladeLike{S} <: GeometricAlgebraType end
 
 Base.broadcastable(x::BladeLike) = Ref(x)
 
@@ -8,11 +8,11 @@ Base.broadcastable(x::BladeLike) = Ref(x)
 Unit blade with grade `G`, indices `I`, and [`Signature`](@ref) `S`.
 """
 struct UnitBlade{S,G,I} <: BladeLike{S} end
-UnitBlade(inds::SVector{N,T}, sig::Signature = Ø) where {N,T} = UnitBlade{sig, N, inds}()
+
+UnitBlade(inds::SVector{N}, sig::Signature = Ø) where {N} = UnitBlade{sig, N, inds}()
 UnitBlade(inds::AbstractVector, sig::Signature = Ø) = UnitBlade(SVector{length(inds)}(inds), sig)
 
-signature(::UnitBlade{S}) where {S} = S
-unit_scalar(sig) = UnitBlade(SVector{0,Int}(), sig)
+Base.show(io::IO, b::UnitBlade{S,G,I}) where {S,G,I} = print(io, "v$(join(map(subscript, I)))")
 
 """
     Blade{S,B,T}
@@ -27,24 +27,31 @@ end
 
 Blade(inds, sig::Signature, coef) = Blade(coef, UnitBlade(inds, sig))
 
-struct Zero end
-const 𝟎 = Zero()
+Base.show(io::IO, b::Blade{S,<:UnitBlade{S,G,I}}) where {S,G,I} = print(io, string(b.coef), string(b.unit_blade))
 
-scalar(coef, sig) = Blade(coef, unit_scalar(sig))
+unit_blade(b::Blade) = b.unit_blade
+unit_blade(::Type{<:Blade{S,B}}) where {S,B} = B
+
+const ScalarUnitBlade{S} = UnitBlade{S,0,SVector{0,Int}()}
+const ScalarBlade{S,T} = Blade{S,ScalarUnitBlade{S},T}
+
+unit_scalar(sig::Signature) = ScalarUnitBlade{sig}()
+
+scalar(coef, sig::Signature) = Blade(coef, unit_scalar(sig))
 
 grade(b::UnitBlade{S,G}) where {S,G} = G
 grade(b::Blade) = grade(b.unit_blade)
 
-Base.eltype(::Blade{S,B,T}) where {S,B,T} = T
+Base.eltype(b::Blade) = eltype(typeof(b))
+Base.eltype(::Type{<:Blade{S,B,T}}) where {S,B,T} = T
 
-signature(::Blade{S}) where {S} = S
+signature(::BladeLike{S}) where {S} = S
+signature(::Type{<:BladeLike{S}}) where {S} = S
 
-unit_blade(::Type{<:Blade{S,B}}) where {S,B} = B
-
-indices(b::UnitBlade{S,G,I}) where {S,G,I} = I
-indices(b::Blade) = indices(b.unit_blade)
-indices(b::Type{<:Blade{S,<:UnitBlade{S,G,I}}}) where {S,G,I} = I
-indices(b::Type{<:UnitBlade{S,G,I}}) where {S,G,I} = I
+indices(b::UnitBlade) = indices(typeof(b))
+indices(b::Blade) = indices(typeof(b))
+indices(::Type{<:UnitBlade{S,G,I}}) where {S,G,I} = I
+indices(::Type{<:Blade{S,B}}) where {S,B} = indices(B)
 
 grade_index(i::Integer...; dim) = grade_index(dim, collect(i))
 grade_index(dim, b::UnitBlade{S,G,I}) where {S,G,I} = grade_index(dim, I)
@@ -55,13 +62,14 @@ metric(sig::Signature{P,N,D}, i::Val{I}, j::Val{I}) where {P,N,D,I} = metric(sig
 metric(::Signature, ::Val{I}, ::Val{J}) where {I,J} = 0
 metric(::Type{<:UnitBlade{S,1,I}}, ::Type{<:UnitBlade{S,1,J}}) where {S,I,J} = metric(S, Val.(first.((I, J)))...)
 
-grade_els(b::Blade{S,<:UnitBlade{S,G}}, g) where {S,G} = g == G ? b : 𝟎
+grade_projection(b::Blade{S,<:UnitBlade{S,G}}, g) where {S,G} = g == G ? b : 𝟎
 
 linear_index(::UnitBlade{S,G,I}) where {S,G,I} = linear_index(dimension(S), G, I)
 linear_index(b::Blade) = linear_index(b.unit_blade)
+linear_index(dim, grade) = sum(binomial.(dim, 0:(grade-1)))
 
 function linear_index(dim, grade, indices)
-    grade_index(dim, indices) + sum(binomial.(dim, 0:(grade-1)))
+    linear_index(dim, grade) + grade_index(dim, indices)
 end
 
 function grade_from_linear_index(index, dim)
@@ -83,13 +91,14 @@ end
 function indices_from_linear_index(index, dim)
     grade, grade_end = grade_from_linear_index(index, dim)
     grade_start = grade_end - binomial(dim, grade)
-    grade == 0 && return ()
+    grade == 0 && return SVector{0,Int}()
     cs = collect(combinations(1:dim, grade))
     SVector{grade}(cs[index - grade_start])
 end
 
 """
     grade_index(dim, i)
+
 Return the grade index of `i`.
 
 ## Example
@@ -119,15 +128,8 @@ unit_blades_from_grade(dim, grade, sig::Signature) =
 
 unit_blades(dim::Integer, sig::Signature) = unit_blades_from_grade.(dim, 0:dim, sig::Signature)
 
-"""
-Return `val` as a subscript, used for printing `UnitBlade` and `Blade` instances.
-"""
-function subscript(val)
-    r = div(val, 10)
-    subscript_char(x) = Char(8320 + x)
-    r > 0 ? string(subscript_char(r), subscript_char(mod(val, 10))) : string(subscript_char(val))
-end
+struct Zero <: GeometricAlgebraType end
 
-Base.show(io::IO, b::UnitBlade{S,G,I}) where {S,G,I} = print(io, "v$(join(map(subscript, I)))")
-Base.show(io::IO, b::Blade{S,<:UnitBlade{S,G,I}}) where {S,G,I} = print(io, "$(b.coef)", string(b.unit_blade))
+const 𝟎 = Zero()
+
 Base.show(io::IO, ::Zero) = print(io, '𝟎')
