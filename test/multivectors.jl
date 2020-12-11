@@ -12,4 +12,6 @@
     @test mv_2[1,2,3] == 1
     @test 1.0f0v * (1v1 + 2v2) == 1.0f0v1 + 2.0f0v2
     @test 1.0f0 * (1v1 + 2v2) == 1.0f0v1 + 2.0f0v2
+    @test sum(blades(mv_2)) == mv_2
+    @test sum(blades(mv_1)) == mv_1
 end

@@ -25,6 +25,8 @@ end
 (+)(x::GeometricAlgebraType, y::GeometricAlgebraType) = +(promote(x, y)...)
 @type_commutative (+)(x::GeometricAlgebraType, y::Number) = +(promote(x, y)...)
 
+Base.sum(x::AbstractVector{<:GeometricAlgebraType}) where {S} = reduce(+, x)
+
 (-)(::Zero) = 𝟎
 (-)(x::UnitBlade) = Blade(-1.0, x)
 (-)(x::Blade) = Blade(-x.coef, x.unit_blade)
@@ -56,8 +58,6 @@ Right contraction of `x` with `y`.
 """
 function rcontract end
 
-(*)(x::UnitBlade, y::UnitBlade) = prod(precompute_unit_blade(typeof(x), typeof(y)))
-
 @generated function precompute_unit_blade(x::Type{B1}, y::Type{B2}) where {B1<:UnitBlade{S},B2<:UnitBlade{S}} where {S}
     concat_inds = vcat(indices(B1), indices(B2))
     inds = sort(filter(x -> count(i -> i == x, concat_inds) == 1, concat_inds))
@@ -78,8 +78,7 @@ function (*)(x::Blade, y::Blade)
     Blade(λ * ρ, vec)
 end
 
-Base.sum(x::AbstractVector{<:GeometricAlgebraType}) where {S} = reduce(+, x)
-
+(*)(x::UnitBlade, y::UnitBlade) = prod(precompute_unit_blade(typeof(x), typeof(y)))
 @type_commutative (*)(x::ScalarBlade, y::Blade) = typeof(y)(x.coef * y.coef, unit_blade(y))
 (*)(x::ScalarBlade, y::ScalarBlade) = typeof(x)(x.coef * y.coef, unit_blade(x))
 @type_commutative (*)(x::Multivector, y::Blade) = sum(blades(x) .* y)
