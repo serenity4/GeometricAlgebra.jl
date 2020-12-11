@@ -8,12 +8,16 @@ Geometric Algebra (GA) library. Currently in heavy development.
 
 Here are some resources to get started with geometric algebra:
 
-Introduction to GA:
+#### Introduction to GA:
 - Siggraph 2019 talk: https://www.youtube.com/watch?v=tX4H_ctggYo
 - Cambridge course: http://geometry.mrao.cam.ac.uk/2016/10/geometric-algebra-2016/
 - Introductory book: *Vince, J. (2008). Geometric algebra for computer graphics. Springer Science & Business Media.*
 
-Conformal Geometric Algebra:
+#### Conformal Geometric Algebra:
 - Relation with Projective Geometric Algebra: https://arxiv.org/pdf/2002.05993.pdf
+
+#### Geometric Calculus:
+- Reference book: *Hestenes, D., & Sobczyk, G. (2012). Clifford algebra to geometric calculus: a unified language for mathematics and physics (Vol. 5). Springer Science & Business Media.*
+- Tutorial (advanced): https://www.youtube.com/watch?v=ItGlUbFBFfc
 
 Online resources: https://bivector.net
