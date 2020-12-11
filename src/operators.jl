@@ -21,7 +21,7 @@ end
 end
 
 (+)(x::T, y::T) where {T<:Multivector{S} where {S}} = T(x.coefs .+ y.coefs)
-(+)(x::UnitBlade, y::UnitBlade) = 1x + 1y
+(+)(x::UnitBlade{S}, y::UnitBlade{S}) where {S} = 1x + 1y
 (+)(x::GeometricAlgebraType, y::GeometricAlgebraType) = +(promote(x, y)...)
 @type_commutative (+)(x::GeometricAlgebraType, y::Number) = +(promote(x, y)...)
 
@@ -54,7 +54,7 @@ function lcontract end
 
 """
     rcontract(x, y)
-Right contraction of `x` with `y`.
+Right contraction of `x` with `y`. If `x` and `y` are 
 """
 function rcontract end
 
@@ -78,16 +78,17 @@ function (*)(x::Blade, y::Blade)
     Blade(λ * ρ, vec)
 end
 
-(*)(x::UnitBlade, y::UnitBlade) = prod(precompute_unit_blade(typeof(x), typeof(y)))
-@type_commutative (*)(x::ScalarBlade, y::Blade) = typeof(y)(x.coef * y.coef, unit_blade(y))
-(*)(x::ScalarBlade, y::ScalarBlade) = typeof(x)(x.coef * y.coef, unit_blade(x))
-@type_commutative (*)(x::Multivector, y::Blade) = sum(blades(x) .* y)
+(*)(x::UnitBlade{S}, y::UnitBlade{S}) where {S} = prod(precompute_unit_blade(typeof(x), typeof(y)))
+@type_commutative (*)(x::ScalarBlade{S}, y::Blade{S}) where {S} = Blade(x.coef * y.coef, unit_blade(y))
+(*)(x::ScalarBlade{S}, y::ScalarBlade{S}) where {S} = scalar(x.coef * y.coef, S)
+@type_commutative (*)(x::Multivector{S}, y::Blade{S}) where {S} = sum(blades(x) .* y)
 @type_commutative (*)(x::Multivector{S}, y::ScalarBlade{S}) where {S} = Multivector{S}(x.coefs .* y.coef)
 (*)(x::GeometricAlgebraType, y::GeometricAlgebraType) = *(mul_promote(x, y)...)
 @type_commutative (*)(x::Number, y::GeometricAlgebraType) = *(mul_promote(x, y)...)
-(*)(x::Multivector, y::Multivector) = sum(bx * by for bx ∈ blades(x), by ∈ blades(y))
+(*)(x::Multivector{S}, y::Multivector{S}) where {S} = sum(bx * by for bx ∈ blades(x), by ∈ blades(y))
 
-@type_commutative (⋅)(x::Scalar, y) = 𝟎
+@type_commutative (⋅)(x::ScalarBlade, y) = 𝟎
+@type_commutative (⋅)(x::ScalarUnitBlade, y) = 𝟎
 
 for op ∈ [:∧, :⋅]
     @eval begin
@@ -103,7 +104,11 @@ permsign(x::Type{<:BladeLike}, y::Type{<:BladeLike}) = permsign(indices(x), indi
 permsign(i, j) =
     1 - 2 * parity(sortperm(SVector{length(i) + length(j),Int}(vcat(i, j))))
 
-Base.reverse(b::Blade) = (-1)^(1 + grade(b)) * b
+function Base.reverse(b::Blade)
+    g = grade(b)
+    (-1)^(g * (g-1) ÷ 2) * b
+end
+
 Base.reverse(mv::Multivector) = sum(reverse.(blades(mv)))
 
 Base.inv(b::ScalarBlade) = inv(b.coef) * b.unit_blade
