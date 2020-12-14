@@ -11,3 +11,5 @@ include("blades.jl")
 include("grades.jl")
 include("multivectors.jl")
 include("operators.jl")
+
+include("aqua.jl")
