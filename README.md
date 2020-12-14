@@ -1,6 +1,9 @@
 # GeometricAlgebra
 
-![tests](https://github.com/serenity4/GeometricAlgebra.jl/workflows/Run%20tests/badge.svg) [![](https://img.shields.io/badge/docs-stable-blue.svg)](https://serenity4.github.io/GeometricAlgebra.jl/stable) [![](https://img.shields.io/badge/docs-dev-blue.svg)](https://serenity4.github.io/GeometricAlgebra.jl/dev)
+![tests](https://github.com/serenity4/GeometricAlgebra.jl/workflows/Run%20tests/badge.svg)
+[![](https://img.shields.io/badge/docs-stable-blue.svg)](https://serenity4.github.io/GeometricAlgebra.jl/stable)
+[![](https://img.shields.io/badge/docs-dev-blue.svg)](https://serenity4.github.io/GeometricAlgebra.jl/dev)
+[![Aqua QA](https://img.shields.io/badge/Aqua.jl-%F0%9F%8C%A2-aqua.svg)](https://github.com/tkf/Aqua.jl)
 
 Geometric Algebra (GA) library. Currently in heavy development.
 
