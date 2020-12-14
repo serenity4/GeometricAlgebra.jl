@@ -1,5 +1,5 @@
 (+)(x::Blade{S,B}, y::Blade{S,B}) where {S,B} = Blade(x.coef + y.coef, B())
-@type_commutative (+)(x, ::Zero) = x
+@type_commutative (+)(x::GeometricAlgebraType, ::Zero) = x
 (+)(::Zero, ::Zero) = 𝟎
 
 @generated function StaticArrays.SVector(::Type{<:Blade{S}}, ::Type{T}) where {S,T}
@@ -24,6 +24,7 @@ end
 (+)(x::UnitBlade{S}, y::UnitBlade{S}) where {S} = 1x + 1y
 (+)(x::GeometricAlgebraType, y::GeometricAlgebraType) = +(promote(x, y)...)
 @type_commutative (+)(x::GeometricAlgebraType, y::Number) = +(promote(x, y)...)
+@type_commutative (+)(x::Zero, y::Number) = +(promote(x, y)...)
 
 Base.sum(x::AbstractVector{<:GeometricAlgebraType}) = reduce(+, x)
 

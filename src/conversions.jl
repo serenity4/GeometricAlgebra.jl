@@ -12,7 +12,7 @@ end
 Base.convert(T::Type{<:Multivector}, b::UnitBlade) = convert(T, convert(Blade{signature(T), typeof(b), eltype(T)}, b))
 Base.convert(T::Type{<:Multivector}, b::Number) = convert(T, convert(ScalarBlade{signature(T), eltype(T)}, b))
 
-Base.promote_rule(::Type{B}, T::Type{Blade{S,B}}) where {S,B} = T
+Base.promote_rule(::Type{B}, T::Type{Blade{S,B}}) where {S,B<:UnitBlade} = T
 Base.promote_rule(::Type{B}, ::Type{B}) where {B<:UnitBlade} = Blade{signature(B),B}
 Base.promote_rule(::Type{<:UnitBlade{S}}, ::Type{<:UnitBlade{S}}) where {S} = Multivector{S}
 Base.promote_rule(::Type{<:Blade{S,B,T1}}, ::Type{<:Blade{S,B,T2}}) where {S,B,T1,T2} = Blade{S,B,promote_type(T1, T2)}
