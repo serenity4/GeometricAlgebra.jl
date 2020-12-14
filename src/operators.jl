@@ -25,7 +25,7 @@ end
 (+)(x::GeometricAlgebraType, y::GeometricAlgebraType) = +(promote(x, y)...)
 @type_commutative (+)(x::GeometricAlgebraType, y::Number) = +(promote(x, y)...)
 
-Base.sum(x::AbstractVector{<:GeometricAlgebraType}) where {S} = reduce(+, x)
+Base.sum(x::AbstractVector{<:GeometricAlgebraType}) = reduce(+, x)
 
 (-)(::Zero) = 𝟎
 (-)(x::UnitBlade) = Blade(-1.0, x)

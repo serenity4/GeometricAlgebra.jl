@@ -4,7 +4,7 @@ Base.convert(T::Type{<:Number}, b::ScalarBlade) = b.coef
 Base.convert(::Type{<:Blade{S}}, n::Number) where {S} = scalar(n, S)
 Base.convert(T::Type{<:Blade{S}}, b::UnitBlade{S}) where {S} = Blade(one(eltype(T)), b)
 
-function Base.convert(::Type{Multivector{S,T}}, b::Blade{S}) where {S,T,B}
+function Base.convert(::Type{Multivector{S,T}}, b::Blade{S}) where {S,T}
     coefs = @SVector zeros(T, 2^dimension(S))
     Multivector{S}(setindex(coefs, b.coef, linear_index(b)))
 end
@@ -41,4 +41,4 @@ end
 mul_promote_type(T, S) = error("No promotion rule for $T with $S")
 mul_promote_type(N::Type{<:Number}, ::Type{<:Union{<:Blade{S,<:UnitBlade,T}, <:Multivector{S,T}}}) where {S,T} = ScalarBlade{S,promote_type(N, T)}
 mul_promote_type(N::Type{<:Number}, ::Type{<:UnitBlade{S}}) where {S} = ScalarBlade{S,N}
-mul_promote_type(B::Type{<:UnitBlade}, ::Type{<:Union{N,Blade{S,_B,N},Multivector{S,N}}}) where {N<:Number,S,_B} = Blade{signature(B), B, N}
+mul_promote_type(B::Type{<:UnitBlade}, ::Type{<:Union{N,Blade{<:Any,<:Any,N},Multivector{<:Any,N}}}) where {N<:Number} = Blade{signature(B), B, N}

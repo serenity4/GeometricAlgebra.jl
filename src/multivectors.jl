@@ -7,9 +7,9 @@ end
 
 Multivector{S}(coefs::SVector{N,T}) where {S,N,T} = Multivector{S,T,N}(coefs)
 Multivector{S}(coefs) where {S} = Multivector{S}(SVector{length(coefs),eltype(coefs)}(coefs))
-Multivector{S}(coefs::T...) where {S,T<:Number} = Multivector{S}(collect(coefs))
+Multivector{S}(coefs::Number...) where {S} = Multivector{S}(collect(coefs))
 Multivector(sig::Signature, coefs) = Multivector{sig}(SVector{length(coefs), eltype(coefs)}(coefs))
-Multivector(sig::Signature, coefs::T...) where {T<:Number} = Multivector{sig}(collect(coefs))
+Multivector(sig::Signature, coefs::Number...) = Multivector{sig}(collect(coefs))
 
 (==)(x::Multivector{S}, y::Multivector{S}) where {S} = all(x.coefs .== y.coefs)
 
