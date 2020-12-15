@@ -16,11 +16,12 @@ Base.promote_rule(::Type{B}, T::Type{Blade{S,B}}) where {S,B<:UnitBlade} = T
 Base.promote_rule(::Type{B}, ::Type{B}) where {B<:UnitBlade} = Blade{signature(B),B}
 Base.promote_rule(::Type{<:UnitBlade{S}}, ::Type{<:UnitBlade{S}}) where {S} = Multivector{S}
 Base.promote_rule(::Type{<:Blade{S,B,T1}}, ::Type{<:Blade{S,B,T2}}) where {S,B,T1,T2} = Blade{S,B,promote_type(T1, T2)}
-Base.promote_rule(::Type{<:Blade{S,B,T}}, T2::Type{<:Blade{S,B,T}}) where {S,B,T} = Multivector{S, T}
+Base.promote_rule(T1::Type{<:Blade{S}}, T2::Type{<:Blade{S}}) where {S} = Multivector{S, promote_type(eltype(T1), eltype(T2))}
+Base.promote_rule(::Type{T}, ::Type{T}) where {T<:Blade} = T
 Base.promote_rule(::Type{B}, T::Type{<:Blade{S,B}}) where {S,B<:UnitBlade{S}} = T
-Base.promote_rule(::Type{<:UnitBlade}, ::Type{<:Blade{S,B,T}}) where {S,B,T} = Multivector{S,T}
-Base.promote_rule(N::Type{<:Number}, T::Type{<:UnitBlade{S}}) where {S} = promote_rule(T, ScalarBlade{S,N})
-Base.promote_rule(N::Type{<:Number}, T::Type{<:Blade{S}}) where {S} = promote_rule(T, ScalarBlade{S, promote_type(N, eltype(T))})
+Base.promote_rule(::Type{<:UnitBlade}, T::Type{<:Blade}) = Multivector{signature(T),eltype(T)}
+Base.promote_rule(N::Type{<:Number}, T::Type{<:UnitBlade}) = promote_rule(T, ScalarBlade{signature(T),N})
+Base.promote_rule(N::Type{<:Number}, T::Type{<:Blade}) = promote_rule(T, ScalarBlade{signature(T), promote_type(N, eltype(T))})
 Base.promote_rule(::Type{<:Multivector{S,T1}}, ::Type{<:Blade{S,B,T2}}) where {S,B,T1,T2} = Multivector{S,promote_type(T1, T2)}
 
 function mul_promote_single(x, S)
