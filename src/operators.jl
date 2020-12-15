@@ -1,5 +1,5 @@
 (+)(x::Blade{S,B}, y::Blade{S,B}) where {S,B} = Blade(x.coef + y.coef, B())
-@type_commutative (+)(x::GeometricAlgebraType, ::Zero) = x
+@commutative (+)(x::GeometricAlgebraType, ::Zero) = x
 (+)(::Zero, ::Zero) = 𝟎
 
 @generated function StaticArrays.SVector(::Type{<:Blade{S}}, ::Type{T}) where {S,T}
@@ -13,7 +13,7 @@ function (+)(x::Blade{S,B1}, y::Blade{S,B2}) where {S,B1,B2}
     Multivector{S}(setindex(coefs_x, y.coef, linear_index(y)))
 end
 
-@type_commutative function (+)(x::Multivector{S}, y::Blade{S}) where {S}
+@commutative function (+)(x::Multivector{S}, y::Blade{S}) where {S}
     dim = dimension(S)
     index = linear_index(y)
     coefs = setindex(x.coefs, x.coefs[index] + y.coef, index)
@@ -23,8 +23,8 @@ end
 (+)(x::T, y::T) where {T<:Multivector{S} where {S}} = T(x.coefs .+ y.coefs)
 (+)(x::UnitBlade{S}, y::UnitBlade{S}) where {S} = 1x + 1y
 (+)(x::GeometricAlgebraType, y::GeometricAlgebraType) = +(promote(x, y)...)
-@type_commutative (+)(x::GeometricAlgebraType, y::Number) = +(promote(x, y)...)
-@type_commutative (+)(x::Zero, y::Number) = +(promote(x, y)...)
+@commutative (+)(x::GeometricAlgebraType, y::Number) = +(promote(x, y)...)
+@commutative (+)(x::Zero, y::Number) = +(promote(x, y)...)
 
 Base.sum(x::AbstractVector{<:GeometricAlgebraType}) = reduce(+, x)
 
@@ -80,22 +80,28 @@ function (*)(x::Blade, y::Blade)
 end
 
 (*)(x::UnitBlade{S}, y::UnitBlade{S}) where {S} = prod(precompute_unit_blade(typeof(x), typeof(y)))
-@type_commutative (*)(x::ScalarBlade{S}, y::Blade{S}) where {S} = Blade(x.coef * y.coef, unit_blade(y))
+@commutative (*)(x::ScalarBlade{S}, y::Blade{S}) where {S} = Blade(x.coef * y.coef, unit_blade(y))
 (*)(x::ScalarBlade{S}, y::ScalarBlade{S}) where {S} = scalar(x.coef * y.coef, S)
-@type_commutative (*)(x::Multivector{S}, y::Blade{S}) where {S} = sum(blades(x) .* y)
-@type_commutative (*)(x::Multivector{S}, y::ScalarBlade{S}) where {S} = Multivector{S}(x.coefs .* y.coef)
+(*)(x::Multivector{S}, y::Blade{S}) where {S} = sum(blades(x) .* y)
+(*)(x::Blade{S}, y::Multivector{S}) where {S} = sum(x .* blades(y))
+@commutative (*)(x::Multivector{S}, y::ScalarBlade{S}) where {S} = Multivector{S}(x.coefs .* y.coef)
+(*)(::Zero, ::Zero) = 𝟎
+@commutative (*)(::Zero, ::GeometricAlgebraType) = 𝟎
 (*)(x::GeometricAlgebraType, y::GeometricAlgebraType) = *(mul_promote(x, y)...)
 @type_commutative (*)(x::Number, y::GeometricAlgebraType) = *(mul_promote(x, y)...)
-(*)(x::Multivector{S}, y::Multivector{S}) where {S} = sum(bx * by for bx ∈ blades(x), by ∈ blades(y))
 
-@type_commutative (⋅)(x::ScalarBlade, y) = 𝟎
-@type_commutative (⋅)(x::ScalarUnitBlade, y) = 𝟎
+@commutative (⋅)(x::ScalarBlade, ::Any) = 𝟎
+@commutative (⋅)(x::ScalarUnitBlade, ::Any) = 𝟎
 
 for op ∈ [:∧, :⋅]
     @eval begin
         ($op)(x, y) = grade_projection(x * y, result_grade($op, grade(x), grade(y)))
         ($op)(x, y, z...) = reduce($op, vcat(x, y, z...))
     end
+end
+
+for op ∈ [:∧, :⋅, :*]
+    @eval ($op)(x::Multivector{S}, y::Multivector{S}) where {S} = sum($op(bx, by) for bx ∈ blades(x), by ∈ blades(y))
 end
 
 """
@@ -105,11 +111,12 @@ permsign(x::Type{<:BladeLike}, y::Type{<:BladeLike}) = permsign(indices(x), indi
 permsign(i, j) =
     1 - 2 * parity(sortperm(SVector{length(i) + length(j),Int}(vcat(i, j))))
 
-function Base.reverse(b::Blade)
+function Base.reverse(b::UnitBlade)
     g = grade(b)
-    (-1)^(g * (g-1) ÷ 2) * b
+    (-1) ^ (g * (g - 1) ÷ 2) * b
 end
 
+Base.reverse(b::Blade) = b.coef * reverse(unit_blade(b))
 Base.reverse(mv::Multivector) = sum(reverse.(blades(mv)))
 
 Base.inv(b::ScalarBlade) = inv(b.coef) * b.unit_blade
