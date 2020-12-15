@@ -25,6 +25,7 @@ export
     unit_blades, unit_blades_from_grade,
     @basis,
     signature,
+    Zero,
     𝟎,
 
     # multivectors
