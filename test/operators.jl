@@ -1,8 +1,8 @@
 @testset "Operators" begin
-    include("addition.jl")
-    include("geometric_product.jl")
-    include("outer_product.jl")
-    include("inner_product.jl")
-    include("inverse.jl")
-    include("promotions.jl")
+    include("operators/addition.jl")
+    include("operators/geometric_product.jl")
+    include("operators/outer_product.jl")
+    include("operators/inner_product.jl")
+    include("operators/inverse.jl")
+    include("operators/promotions.jl")
 end
