@@ -136,9 +136,14 @@ magnitude(x) = sqrt(magnitude2(x))
 Base.reverse(b::Blade) = b.coef * reverse(unit_blade(b))
 Base.reverse(mv::Multivector) = sum(reverse.(blades(mv)))
 
-Base.inv(b::ScalarBlade) = inv(b.coef) * b.unit_blade
-Base.inv(b::Blade) = (b.coef / (reverse(b) * b).coef) * b.unit_blade
-Base.inv(mv::Multivector) = sum(inv.(blades(mv)))
+Base.inv(x::GeometricAlgebraType) = reverse(x) / magnitude2(x)
+Base.inv(mv::Multivector) = mapreduce(inv, +, blades(mv))
+
+(/)(x::GeometricAlgebraType, y::GeometricAlgebraType) = x * inv(y)
+@type_commutative (/)(x::Any, y::GeometricAlgebraType) = x * inv(y)
+(/)(x::ScalarBlade{S}, y::ScalarBlade{S}) where {S} = scalar(x.coef / y.coef, S)
+
+Base.sqrt(x::ScalarBlade) = scalar(sqrt(x.coef), signature(x))
 
 """
 Return the grade(s) that can be present in the result of an operation.
