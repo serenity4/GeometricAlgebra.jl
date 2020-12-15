@@ -12,11 +12,12 @@ Multivector(sig::Signature, coefs) = Multivector{sig}(SVector{length(coefs), elt
 Multivector(sig::Signature, coefs::Number...) = Multivector{sig}(collect(coefs))
 
 (==)(x::Multivector{S}, y::Multivector{S}) where {S} = all(x.coefs .== y.coefs)
+(≈)(x::Multivector{S}, y::Multivector{S}; kwargs...) where {S} = all(isapprox.(x.coefs, y.coefs; kwargs...))
 
 grade(mv::Multivector) = maximum(grade.(blades(mv)))
 
 """
-Return the blades of grade `g` from a `Multivector`.
+Set all elements of grade ≠ `g` to zero.
 """
 function grade_projection(mv::Multivector, g)
     dim = dimension(mv)

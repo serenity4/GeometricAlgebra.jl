@@ -4,7 +4,7 @@ using StaticArrays
 using IterTools
 using Combinatorics
 
-import Base: *, +, -, /, ==
+import Base: *, +, -, /, ==, ≈
 
 abstract type GeometricAlgebraType end
 
