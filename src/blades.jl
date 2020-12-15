@@ -130,6 +130,9 @@ unit_blades(dim::Integer, sig::Signature) = unit_blades_from_grade.(dim, 0:dim, 
 
 struct Zero <: GeometricAlgebraType end
 
+grade(::Zero) = 0
+grade_projection(::Zero, _) = 𝟎
+
 const 𝟎 = Zero()
 
 Base.show(io::IO, ::Zero) = print(io, '𝟎')
