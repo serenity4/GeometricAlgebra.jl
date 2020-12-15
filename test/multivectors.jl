@@ -14,4 +14,8 @@
     @test 1.0f0 * (1v1 + 2v2) == 1.0f0v1 + 2.0f0v2
     @test sum(blades(mv_2)) == mv_2
     @test sum(blades(mv_1)) == mv_1
+
+    @test 1v2 + 1v12 == Multivector{_S}(@SVector([0, 0, 1, 0, 1, 0, 0, 0]))
+    @test 1v1 + mv_1 == Multivector{_S}(@SVector([0, 2, 1, 0, 0, 0, 0, 0]))
+    @test v1 + v2 == mv_1
 end

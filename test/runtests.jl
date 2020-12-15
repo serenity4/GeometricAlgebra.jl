@@ -1,15 +1,19 @@
 using GeometricAlgebra
 using StaticArrays
 using Test
+using SafeTestsets
 
 const ga = GeometricAlgebra
 
-include("definitions.jl")
-include("signatures.jl")
-include("basis.jl")
-include("blades.jl")
-include("grades.jl")
-include("multivectors.jl")
-include("operators.jl")
+@safetestset "Implementation" begin include("implementations.jl") end
+
+testsets = [("𝓖₄", "++++"), ("𝒢₃,₁", "+++-")]
+
+@testset "Identities in $name" for (name, sig) ∈ testsets
+    begin
+        @eval @basis $sig
+        include("operators.jl")
+    end
+end
 
 include("aqua.jl")

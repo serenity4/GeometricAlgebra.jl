@@ -1,9 +1,9 @@
 @testset "Grades" begin
-    @test grade_index(1; dim) == 1
-    @test grade_index(2; dim) == 2
-    @test grade_index(3; dim) == 3
-    @test grade_index(1, 2; dim) == 1
-    @test grade_index(1, 2, 3; dim) == 1
+    @test grade_index(1; dim=3) == 1
+    @test grade_index(2; dim=3) == 2
+    @test grade_index(3; dim=3) == 3
+    @test grade_index(1, 2; dim=3) == 1
+    @test grade_index(1, 2, 3; dim=3) == 1
 
     @test grade_index(1; dim=5) == 1
     @test grade_index(1, 2; dim=5) == 1
