@@ -55,7 +55,7 @@ function blades(mv::Multivector{S,T}) where {S,T}
     res = []
     d = dimension(S)
     for (i, c) ∈ enumerate(mv.coefs)
-        if c ≠ 0
+        if c ≉ 0
             inds = indices_from_linear_index(i, d)
             b = UnitBlade(inds, S)
             push!(res, Blade(c, b))
