@@ -102,10 +102,13 @@ end
 @commutative (⋅)(::ScalarUnitBlade{S}, ::Any) where {S} = 𝟎
 (⋅)(::ScalarUnitBlade{S}, ::ScalarUnitBlade{S}) where {S} = 𝟎
 
-for op ∈ [:∧, :⋅]
+for op ∈ [:∧, :⋅, :⦿]
+
+    # ⋅ is not associative
+    fold = op == :⋅ ? foldr : reduce
     @eval begin
-        ($op)(x, y) = grade_projection(x * y, result_grade($op, grade(x), grade(y)))
-        ($op)(x, y, z...) = reduce($op, vcat(x, y, z...))
+        ($op)(x::Any, y::Any) = grade_projection(x * y, result_grade($op, grade(x), grade(y)))
+        ($op)(x::Any, y::Any, z::Any...) = $fold($op, vcat(x, y, z...))
     end
 end
 
@@ -135,8 +138,9 @@ Base.inv(mv::Multivector) = sum(inv.(blades(mv)))
 """
 Return the grade(s) that can be present in the result of an operation.
 """
-result_grade(::typeof(⋅), grade_a, grade_b) = abs(grade_a - grade_b)
-result_grade(::typeof(∧), grade_a, grade_b) = grade_a + grade_b
-result_grade(::typeof(lcontract), grade_a, grade_b) = grade_b - grade_a
-result_grade(::typeof(rcontract), grade_a, grade_b) = grade_a - grade_b
-result_grade(::typeof(*), grade_a, grade_b) = result_grade(⋅, grade_a, grade_b):2:result_grade(∧, grade_a, grade_b)
+result_grade(::typeof(⋅), r, s) = abs(r - s)
+result_grade(::typeof(∧), r, s) = r + s
+result_grade(::typeof(lcontract), r, s) = s - r
+result_grade(::typeof(rcontract), r, s) = r - s
+result_grade(::typeof(⦿), _, _) = 0
+result_grade(::typeof(*), r, s) = result_grade(⋅, r, s):2:result_grade(∧, r, s)
