@@ -8,6 +8,8 @@ import Base: *, +, -, /, ==, ≈
 
 abstract type GeometricAlgebraType end
 
+Base.broadcastable(x::GeometricAlgebraType) = Ref(x)
+
 include("utils.jl")
 include("signatures.jl")
 include("blades.jl")

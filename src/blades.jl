@@ -1,7 +1,5 @@
 abstract type BladeLike{S} <: GeometricAlgebraType end
 
-Base.broadcastable(x::BladeLike) = Ref(x)
-
 """
     UnitBlade{S,G,I}
 
