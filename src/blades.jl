@@ -41,6 +41,7 @@ scalar(coef, sig::Signature) = Blade(coef, unit_scalar(sig))
 
 grade(b::UnitBlade{S,G}) where {S,G} = G
 grade(b::Blade) = grade(b.unit_blade)
+grade(::Number) = 0
 
 Base.eltype(b::Blade) = eltype(typeof(b))
 Base.eltype(::Type{<:Blade{S,B,T}}) where {S,B,T} = T
