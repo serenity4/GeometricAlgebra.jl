@@ -34,7 +34,7 @@ export
     is_homogeneous,
 
     # operators
-    ∧, ⋅,
+    ∧, ⋅, ⦿,
     lcontract, rcontract,
     grade_projection,
 

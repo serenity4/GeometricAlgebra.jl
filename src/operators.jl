@@ -43,9 +43,16 @@ function ∧ end
 
 """
     x ⋅ y
-Inner product of `x` with `y`.
+Inner product of `x` with `y`. This product is in general non-associative, and is conventinally executed right to left in absence of parenthesis.
+For example, `A ⋅ B ⋅ C == A ⋅ (B ⋅ C)`, and in most cases, `A ⋅ B ⋅ C ≠ (A ⋅ B) ⋅ C`.
 """
 function ⋅ end
+
+"""
+    x ⦿ y
+Scalar product between `x` and `y`.
+"""
+function ⦿ end
 
 """
     lcontract(x, y)
@@ -55,7 +62,7 @@ function lcontract end
 
 """
     rcontract(x, y)
-Right contraction of `x` with `y`. If `x` and `y` are 
+Right contraction of `x` with `y`.
 """
 function rcontract end
 
