@@ -30,7 +30,6 @@ macro basis(prefix, opt, sig::AbstractString)
 
     assign = _const ? ex -> Expr(:const, ex) : identity
 
-    prefix isa QuoteNode ? prefix = prefix.value : nothing
     @assert prefix isa Symbol "Only symbols are supported for the second argument (received $prefix)"
 
     sig = Signature(sig)
@@ -50,6 +49,6 @@ macro basis(prefix, opt, sig::AbstractString)
     end
 end
 
-macro basis(sig::AbstractString) esc(:(@basis(:v, $nothing, $sig))) end
-macro basis(opt::QuoteNode, sig::AbstractString) esc(:(@basis(:v, $opt, $sig))) end
+macro basis(sig::AbstractString) esc(:(@basis(v, $nothing, $sig))) end
+macro basis(opt::QuoteNode, sig::AbstractString) esc(:(@basis(v, $opt, $sig))) end
 macro basis(prefix::Symbol, sig::AbstractString) esc(:(@basis($prefix, $nothing, $sig))) end
