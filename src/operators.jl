@@ -128,6 +128,11 @@ function Base.reverse(b::UnitBlade)
     (-1) ^ (g * (g - 1) ÷ 2) * b
 end
 
+magnitude2(x::Multivector) = scalar((reverse(x) ⦿ x).coefs[1], signature(x))
+magnitude2(x::Blade) = reverse(x) ⦿ x
+
+magnitude(x) = sqrt(magnitude2(x))
+
 Base.reverse(b::Blade) = b.coef * reverse(unit_blade(b))
 Base.reverse(mv::Multivector) = sum(reverse.(blades(mv)))
 
