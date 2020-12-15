@@ -1,20 +1,27 @@
 """
-    @basis [prefix=:v] <signature>
+    @basis [prefix=v, opt=nothing] <signature>
 
-Pull all unit blade symbols from a geometric algebra with a given `signature` in the local scope.
+Pull all unit blade symbols from a geometric algebra with a given `signature` in the local scope, prefixed with `prefix`.
+`opt` currently supports only one option, `:const`, which declares variables as `const`.
 
 ## Examples
 
-To obtain the unit blades of 𝒢³ the geometric algebra over the 3-dimensional vector space ℝ³, you just have to specify a positive signature with "+++":
+To obtain the unit blades of 𝒢(ℝ³) the geometric algebra over the 3-dimensional vector space ℝ³, you just have to specify a positive signature with "+++":
 
 ```julia
-julia> @basis "+++" 3 # v is the default prefix
+julia> @basis "+++" # v is the default prefix
 ```
 
 To bind the blades to variables with different prefix than the default v, just add the prefix before the signature:
 
 ```julia
-julia> @basis g "+++" 3 # assigned variables will be g, g1, g12...
+julia> @basis g "+++" # assigned variables will be g, g1, g12...
+```
+
+When operating at a global scope, it is a good idea to declare everything as const with the option `:const`:
+
+```julia
+julia> @basis :const "+++" # variables will be declared as `const`
 ```
 
 """
