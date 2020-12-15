@@ -40,6 +40,10 @@ Base.eltype(mv::Multivector) = eltype(typeof(mv))
 Base.length(::Multivector{S,T,N}) where {S,T,N} = N
 
 Base.zeros(::Type{<:Multivector{S}}) where {S} = Multivector{S}(zeros(2^dimension(S)))
+Base.zero(T::Type{<:Multivector{S}}) where {S} = zeros(T)
+
+Base.iseven(mv::Multivector) = all(iseven.(grade.(blades(mv))))
+Base.isodd(mv::Multivector) = all(isodd.(grade.(blades(mv))))
 
 Base.convert(T::Type{Multivector{S}}, ::Zero) where {S} = zeros(T)
 

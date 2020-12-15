@@ -46,6 +46,11 @@ grade(::Number) = 0
 Base.eltype(b::Blade) = eltype(typeof(b))
 Base.eltype(::Type{<:Blade{S,B,T}}) where {S,B,T} = T
 
+Base.zero(T::Type{<:Blade}) = T(zero(eltype(T)), unit_blade(T)())
+
+Base.iseven(b::BladeLike) = iseven(grade(b))
+Base.isodd(b::BladeLike) = isodd(grade(b))
+
 signature(::BladeLike{S}) where {S} = S
 signature(::Type{<:BladeLike{S}}) where {S} = S
 
