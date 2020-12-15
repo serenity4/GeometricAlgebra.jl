@@ -97,8 +97,10 @@ end
 (*)(x::GeometricAlgebraType, y::GeometricAlgebraType) = *(mul_promote(x, y)...)
 @type_commutative (*)(x::Number, y::GeometricAlgebraType) = *(mul_promote(x, y)...)
 
-@commutative (⋅)(x::ScalarBlade, ::Any) = 𝟎
-@commutative (⋅)(x::ScalarUnitBlade, ::Any) = 𝟎
+@commutative (⋅)(::ScalarBlade{S}, ::Any) where {S} = 𝟎
+(⋅)(::ScalarBlade{S}, ::ScalarBlade{S}) where {S} = 𝟎
+@commutative (⋅)(::ScalarUnitBlade{S}, ::Any) where {S} = 𝟎
+(⋅)(::ScalarUnitBlade{S}, ::ScalarUnitBlade{S}) where {S} = 𝟎
 
 for op ∈ [:∧, :⋅]
     @eval begin
