@@ -137,7 +137,6 @@ Base.reverse(b::Blade) = b.coef * reverse(unit_blade(b))
 Base.reverse(mv::Multivector) = sum(reverse.(blades(mv)))
 
 Base.inv(x::GeometricAlgebraType) = reverse(x) / magnitude2(x)
-Base.inv(mv::Multivector) = mapreduce(inv, +, blades(mv))
 
 (/)(x::GeometricAlgebraType, y::GeometricAlgebraType) = x * inv(y)
 @type_commutative (/)(x::Any, y::GeometricAlgebraType) = x * inv(y)
