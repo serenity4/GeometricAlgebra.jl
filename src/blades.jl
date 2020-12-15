@@ -27,6 +27,8 @@ end
 
 Blade(inds, sig::Signature, coef) = Blade(coef, UnitBlade(inds, sig))
 
+(≈)(x::Blade, y::Blade; kwargs...) = unit_blade(x) == unit_blade(y) && ≈(x.coef, y.coef; kwargs...)
+
 Base.show(io::IO, b::Blade{S,<:UnitBlade{S,G,I}}) where {S,G,I} = print(io, string(b.coef), string(b.unit_blade))
 
 unit_blade(b::Blade) = b.unit_blade
@@ -132,6 +134,11 @@ struct Zero <: GeometricAlgebraType end
 
 grade(::Zero) = 0
 grade_projection(::Zero, _) = 𝟎
+
+(≈)(::Zero, ::Zero; kwargs...) = true
+(≈)(::Zero, x; kwargs...) = ≈(x, zero(typeof(x)); kwargs...)
+(≈)(x, ::Zero; kwargs...) = ≈(x, zero(typeof(x)); kwargs...)
+(==)(::Zero, ::Zero) = true
 
 const 𝟎 = Zero()
 

@@ -12,7 +12,10 @@ Multivector(sig::Signature, coefs) = Multivector{sig}(SVector{length(coefs), elt
 Multivector(sig::Signature, coefs::Number...) = Multivector{sig}(collect(coefs))
 
 (==)(x::Multivector{S}, y::Multivector{S}) where {S} = all(x.coefs .== y.coefs)
+
 (≈)(x::Multivector{S}, y::Multivector{S}; kwargs...) where {S} = all(isapprox.(x.coefs, y.coefs; kwargs...))
+(≈)(x::Blade{S}, y::Multivector{S}; kwargs...) where {S} = ≈(x.coef, y.coefs[linear_index(x)])
+(≈)(y::Multivector{S}, x::Blade{S}; kwargs...) where {S} = ≈(x.coef, y.coefs[linear_index(x)])
 
 grade(mv::Multivector) = maximum(grade.(blades(mv)))
 
