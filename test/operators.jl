@@ -5,6 +5,7 @@
     include("operators/reverse.jl")
     include("operators/outer_product.jl")
     include("operators/inner_product.jl")
+    include("operators/scalar_product.jl")
     include("operators/inverse.jl")
     include("operators/promotions.jl")
     include("operators/projections.jl")
