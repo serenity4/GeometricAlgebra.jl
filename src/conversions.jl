@@ -12,6 +12,9 @@ end
 Base.convert(T::Type{<:Multivector}, b::UnitBlade) = convert(T, convert(Blade{signature(T), typeof(b), eltype(T)}, b))
 Base.convert(T::Type{<:Multivector}, b::Number) = convert(T, convert(ScalarBlade{signature(T), eltype(T)}, b))
 
+Base.convert(::Type{Zero}, ::Any) = 𝟎
+Base.convert(::Type{Zero}, ::Zero) = 𝟎
+
 Base.promote_rule(::Type{B}, T::Type{Blade{S,B}}) where {S,B<:UnitBlade} = T
 Base.promote_rule(::Type{B}, ::Type{B}) where {B<:UnitBlade} = Blade{signature(B),B}
 Base.promote_rule(::Type{<:UnitBlade{S}}, ::Type{<:UnitBlade{S}}) where {S} = Multivector{S}
@@ -42,4 +45,5 @@ end
 mul_promote_type(T, S) = error("No promotion rule for $T with $S")
 mul_promote_type(N::Type{<:Number}, ::Type{<:Union{<:Blade{S,<:UnitBlade,T}, <:Multivector{S,T}}}) where {S,T} = ScalarBlade{S,promote_type(N, T)}
 mul_promote_type(N::Type{<:Number}, ::Type{<:UnitBlade{S}}) where {S} = ScalarBlade{S,N}
+mul_promote_type(N::Type{<:Number}, ::Type{Zero}) = Zero
 mul_promote_type(B::Type{<:UnitBlade}, ::Type{<:Union{N,Blade{<:Any,<:Any,N},Multivector{<:Any,N}}}) where {N<:Number} = Blade{signature(B), B, N}
