@@ -47,6 +47,9 @@ Base.eltype(b::Blade) = eltype(typeof(b))
 Base.eltype(::Type{<:Blade{S,B,T}}) where {S,B,T} = T
 
 Base.zero(T::Type{<:Blade}) = T(zero(eltype(T)), unit_blade(T)())
+Base.zero(b::Blade) = zero(typeof(b))
+
+Base.one(T::Type{<:Blade}) = T(one(eltype(T)), unit_blade(T)())
 
 Base.iseven(b::BladeLike) = iseven(grade(b))
 Base.isodd(b::BladeLike) = isodd(grade(b))
@@ -143,6 +146,8 @@ grade_projection(::Zero, _) = 𝟎
 (≈)(::Zero, x; kwargs...) = ≈(x, zero(typeof(x)); kwargs...)
 (≈)(x, ::Zero; kwargs...) = ≈(x, zero(typeof(x)); kwargs...)
 (==)(::Zero, ::Zero) = true
+
+Base.iszero(x::Zero) = true
 
 const 𝟎 = Zero()
 
