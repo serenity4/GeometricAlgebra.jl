@@ -1,7 +1,6 @@
 @testset "Geometric product" begin
     @test A * (B + C) ≈ A * B + A * C
     @test (B + C) * A ≈ B * A + C * A
-    @test A + 𝟎 == A
     @test A * 1 == A
     @test A + (-A) ≈ zeros(MV)
 
