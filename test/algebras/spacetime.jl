@@ -1,5 +1,6 @@
 using GeometricAlgebra
 const ga = GeometricAlgebra
 
-@basis :const "---+"
+@basis "---+"
+include("definitions.jl")
 include("../operators.jl")

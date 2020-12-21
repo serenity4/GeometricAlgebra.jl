@@ -1,5 +1,4 @@
 @testset "Operators" begin
-    include("operators/definitions.jl")
     include("operators/addition.jl")
     include("operators/geometric_product.jl")
     include("operators/reverse.jl")
