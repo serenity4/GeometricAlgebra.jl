@@ -35,9 +35,7 @@ export @basis,
 
     # index manipulation
     linear_index,
-    grade_from_linear_index,
     indices_from_linear_index,
-    grade_index,
 
     # signatures
     Signature,

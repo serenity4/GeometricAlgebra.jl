@@ -5,8 +5,6 @@ const ga = GeometricAlgebra
 
 @basis "++-"
 
-include("indices.jl")
-
 blade = Blade(1, 4)
 
 include("blades.jl")

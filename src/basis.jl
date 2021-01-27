@@ -4,12 +4,14 @@ function basis(sig::Signature, prefix::Symbol, export_symbols::Bool, export_meta
     n = dimension(sig)
     n > 0 || throw(ArgumentError("Invalid zero-dimensional signature $sig"))
 
+    _combinations = [[], combinations(1:n)...]
+
     inds = 1:2^n
-    blade_symbols = map(x -> Symbol(prefix, join(string.(indices_from_linear_index(n, x)))), inds)
+    blade_symbols = map(x -> Symbol(prefix, join(string.(indices_from_linear_index(_combinations, x)))), inds)
     blades = Blade.(1, inds)
     exprs = map((x, y) -> (:(const $x = $y)), blade_symbols, blades)
 
-    table = broadcast(produce_indices, [[], combinations(1:n)...], [[], combinations(1:n)...]', sig)
+    table = reshape([produce_indices(i, j, _combinations, sig) for i ∈ _combinations, j ∈ _combinations], 2^n, 2^n)
 
     exports = Symbol[]
     export_symbols && append!(exports, blade_symbols)
@@ -23,7 +25,7 @@ function basis(sig::Signature, prefix::Symbol, export_symbols::Bool, export_meta
         const ga = GeometricAlgebra
 
         import Base: fill, zero, *, getindex, show, reverse
-        import GeometricAlgebra: Blade, KVector, Multivector, grade, grade_projection, geom, op_result_type, kvectors, kvector, dual, ∨
+        import GeometricAlgebra: Blade, KVector, Multivector, grade, grade_projection, geom, op_result_type, kvectors, kvector, dual, ∨, linear_index, indices_from_linear_index
 
         $(exprs...)
 
@@ -42,13 +44,12 @@ function basis(sig::Signature, prefix::Symbol, export_symbols::Bool, export_meta
     mod, modname
 end
 
-function produce_indices(i, j, sig::Signature)
-    j = j'
+function produce_indices(i, j, combinations, sig::Signature)
     concat_inds = vcat(i, j)
-    inds = sort(filter(x -> count(i -> i == x, concat_inds) == 1, concat_inds))
-    double_inds = filter(x -> count(i -> i == x, concat_inds) == 2, unique(concat_inds))
+    inds = sort(filter(x -> count(==(x), concat_inds) == 1, concat_inds))
+    double_inds = filter(x -> count(==(x), concat_inds) == 2, unique(concat_inds))
     metric_factor = prod(map(ei -> metric(sig, Val(ei)), double_inds))
-    linear_index(dimension(sig), length(inds), inds), metric_factor * permsign(i, j)
+    linear_index(combinations, inds), metric_factor * permsign(i, j)
 end
 
 """
