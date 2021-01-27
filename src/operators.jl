@@ -29,10 +29,10 @@ end
 convert(T::Type{<:Blade}, b::Blade) = T(b.coef, b.index)
 convert(T::Type{<:Blade}, x::Number) = scalar(x)
 
-promote_type(T1::Type{<:Blade}, T2::Type{<:Blade}) = Blade{promote_type(eltype(T1), eltype(T2))}
-promote_type(T1::Type{<:KVector}, T2::Type{<:KVector}) = Multivector
-promote_type(T1::Type{<:Multivector}, T2::Type{<:KVector}) = Multivector
-# promote_type(T1::Type{<:Blade}, T2::Type{<:Number}) = Blade{promote_type(eltype(T1), T2)}
+promote_rule(T1::Type{<:Blade}, T2::Type{<:Blade}) = Blade{promote_type(eltype(T1), eltype(T2))}
+promote_rule(T1::Type{<:KVector}, T2::Type{<:KVector}) = Multivector
+promote_rule(T1::Type{<:Multivector}, T2::Type{<:KVector}) = Multivector
+# promote_rule(T1::Type{<:Blade}, T2::Type{<:Number}) = Blade{promote_type(eltype(T1), T2)}
 
 (+)(kvecs::KVector{K}...) where {K} = KVector{K}(.+(getproperty.(kvecs, :coefs)...))
 (+)(mvecs::Multivector...) = Multivector(.+(getproperty.(mvecs, :coefs)...))
@@ -125,6 +125,8 @@ end
 @commutative (*)(x::Multivector, y::Number) = typeof(x)(x.coefs .* y)
 @commutative (*)(x::Blade, y::Number) = Blade(x.coef * y, x.index)
 (*)(xs::GeometricAlgebraType...) = reduce(*, xs)
+
+(^)(x::GeometricAlgebraType, p::Integer) = prod(ntuple(i -> x, p))
 
 @commutative (⋅)(x::GeometricAlgebraType, y::Number) = scalar(zero(promote_type(eltype(x), typeof(y))))
 (⋅)(x::GeometricAlgebraType, y::Blade) = is_scalar(y) ? x ⋅ y.coef : grade_projection(x * y, Val(result_grade(⋅, grade(x), grade(y))))
