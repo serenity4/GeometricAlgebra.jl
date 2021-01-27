@@ -14,6 +14,7 @@ function basis(sig::Signature, prefix::Symbol, export_symbols::Bool, export_meta
     exports = Symbol[]
     export_symbols && append!(exports, blade_symbols)
     export_metadata && append!(exports, [:N, :SIGNATURE, :TABLE, :MultivectorArray])
+    export_pseudoscalar && push!(exports, :I)
 
     mod = :(module $modname
         using GeometricAlgebra: GeometricAlgebra, subscript, reverse_sign, scalar, ⋅, ∧
@@ -51,7 +52,7 @@ function produce_indices(i, j, sig::Signature)
 end
 
 """
-    @basis <signature> [prefix=v, export_symbols=true, export_metadata=true, modname=GeneratedGA]
+    @basis <signature> [prefix=v, export_symbols=true, export_metadata=true, export_pseudoscalar=true, modname=GeneratedGA]
 
 Create a module `modname`, fill it with all unit blade symbols from a geometric algebra with a given `signature` prefixed with `prefix`, and import it with `using`.
 The exported variables depend on the options `export_symbols` and `export_metadata`.
@@ -61,6 +62,7 @@ If `export_metadata` is true, then the following symbols are exported:
 - `TABLE`: the table containing precomputed values for blade products
 - `SIGNATURE`: the signature used to build the algebra
 - `MultivectorArray`: a concrete multivector array representation, with `2^N` coefficients.
+If `export_pseudoscalar` is true, then the alias `I = v₁...ₙ` will be exported.
 
 ## Examples
 
@@ -90,6 +92,7 @@ const basis_macro_opts = [
     :prefix => :v,
     :export_symbols => true,
     :export_metadata => true,
+    :export_pseudoscalar => true,
     :modname => :GeneratedGA,
 ]
 
