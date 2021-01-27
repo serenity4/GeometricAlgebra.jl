@@ -141,7 +141,9 @@ end
 
 @commutative (⋅)(x::GeometricAlgebraType, y::Number) = scalar(zero(promote_type(eltype(x), typeof(y))))
 (⋅)(x::GeometricAlgebraType, y::Blade) = is_scalar(y) ? x ⋅ y.coef : grade_projection(x * y, Val(result_grade(⋅, grade(x), grade(y))))
+(⋅)(x::Multivector, y::Blade) = sum(kx ⋅ y for kx ∈ kvectors(x))
 (⋅)(x::Blade, y::GeometricAlgebraType) = is_scalar(x) ? x.coef ⋅ y : grade_projection(x * y, Val(result_grade(⋅, grade(x)), grade(x)))
+(⋅)(x::Blade, y::Multivector) = sum(x ⋅ ky for ky ∈ kvectors(y))
 (⋅)(x::Blade, y::Blade) = is_scalar(x) || is_scalar(y) ? scalar(zero(promote_type(eltype(x), eltype(y)))) : grade_projection(x * y, Val(result_grade(⋅, grade(x), grade(y))))
 (⋅)(x::T, y::T) where {T<:Number} = scalar(zero(T))
 (⋅)(x::Number, y::Number) = scalar(zero(promote_type(typeof(x), typeof(y))))
@@ -150,7 +152,6 @@ end
 
 @commutative (∧)(x::GeometricAlgebraType, y::Number) = x * y
 (∧)(x::Number, y::Number) = scalar(x * y)
-
 
 for op ∈ [:∧, :⋅, :⦿]
 
@@ -163,7 +164,7 @@ for op ∈ [:∧, :⋅, :⦿]
             ($op)(x::Blade, y::Blade) = grade_projection(x * y, Val(0)).coef
         end
     else
-        @eval ($op)(x::GeometricAlgebraType, y::GeometricAlgebraType) = grade_projection(x * y, Val(result_grade($op, grade(x), grade(y))))        
+        @eval ($op)(x::GeometricAlgebraType, y::GeometricAlgebraType) = grade_projection(x * y, Val(result_grade($op, grade(x), grade(y))))
     end
 
     @eval begin
