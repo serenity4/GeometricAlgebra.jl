@@ -77,8 +77,13 @@ julia> @basis "+++" prefix=g # assigned variables will be g, g1, g12...
 ```
 """
 macro basis(sig::AbstractString, opts...)
-    mod, modname = basis(Signature(sig), parse_macro_opts(collect(opts))...)
-    :($(Expr(:toplevel, esc(mod))); using .$modname)
+    try
+        mod, modname = basis(Signature(sig), parse_macro_opts(collect(opts))...)
+        :($(Expr(:toplevel, esc(mod))); using .$modname)
+    catch e
+        e isa ArgumentError || rethrow()
+        :(throw($(esc(e))))
+    end
 end
 
 const basis_macro_opts = [
@@ -96,8 +101,8 @@ function parse_macro_opts(opts::AbstractVector)
     end
 end
 
-function check_opt(opt::Expr)
-    opt.head == :(=) || throw(ArgumentError("Keyword arguments must be `(name=value)` pairs"))
+function check_opt(opt)
+    opt isa Expr && opt.head == :(=) || throw(ArgumentError("Keyword arguments must be `(name=value)` pairs"))
     opt_name(opt) ∈ first.(basis_macro_opts) || throw(ArgumentError("Unknown option $(opt_name(opt)). Available options are $(join(first.(basis_macro_opts), ", "))"))
 end
 

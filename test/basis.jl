@@ -14,4 +14,7 @@ end
     @test isdefined(TestModule, :g123)
     @test isdefined(TestModule, :g13)
     @test TestModule.g123 == v123
+
+    @test_throws ArgumentError("Keyword arguments must be `(name=value)` pairs") @basis "+++" unknown_option
+    @test_throws ArgumentError("Unknown option unknown_option. Available options are prefix, export_symbols, export_metadata, modname") @basis "+++" unknown_option=nothing
 end
