@@ -171,9 +171,10 @@ grade_projection(x::KVector{K}, ::Val{K}) where {K} = x
 grade_projection(x::KVector, ::Val{K}) where {K} = zero(KVector{K}, eltype(x))
 
 magnitude2(x::Number) = x*x
-magnitude2(x::GeometricAlgebraType) = (reverse(x) ⦿ x).coef
+magnitude2(x::Blade) = (reverse(x) ⦿ x).coef
+magnitude2(x::GeometricAlgebraType) = first((reverse(x) ⦿ x).coefs)
 
-magnitude(x) = sqrt(magnitude2(x))
+magnitude(x) = sqrt(abs(magnitude2(x)))
 
 inv(x::GeometricAlgebraType) = reverse(x) / magnitude2(x)
 
