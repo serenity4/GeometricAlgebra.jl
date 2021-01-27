@@ -1,6 +1,7 @@
 const MultivectorArray = MVector{2^N}
 
 KVector{K}(coefs::MVector) where {K} = KVector{K,typeof(coefs)}(coefs, linear_index(K) + 1)
+KVector{K,V}(coefs::V) where {K,V<:AbstractVector} = KVector{K,V}(coefs, linear_index(K) + 1)
 
 zero(::Type{<:KVector{K}}, T) where {K} = KVector{K}(zeros(MVector{binomial(N, K),T}))
 zero(::Type{<:Multivector}, T) = Multivector(zeros(MultivectorArray))
