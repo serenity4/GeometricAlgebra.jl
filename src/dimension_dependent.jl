@@ -36,9 +36,9 @@ grade_projection(x::Blade, ::Val{K}) where {K} = grade(x) == K ? x : K > N ? sca
 grade(b::Blade) = grade_from_linear_index(b.index)[1]
 
 function grade(mv::Multivector)
-    higher_nonzero_index = findlast(x -> x ≉ 0, mv.coefs)
+    higher_nonzero_index = findlast(≉(0), mv.coefs)
     isnothing(higher_nonzero_index) && return N
-    findfirst(g -> higher_nonzero_index ≤ g, linear_index.(0:N) .+ 1) - 1
+    findfirst(≤(higher_nonzero_index), linear_index.(0:N) .+ 1) - 1
 end
 
 reverse(x::Multivector) = Multivector(map(x -> reverse_sign(grade_from_linear_index(x[1])[1]) * x[2], enumerate(x.coefs)))
