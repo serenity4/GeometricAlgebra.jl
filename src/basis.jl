@@ -102,8 +102,8 @@ function parse_macro_opts(opts::AbstractVector)
 end
 
 function check_opt(opt)
-    opt isa Expr && opt.head == :(=) || throw(ArgumentError("Keyword arguments must be `(name=value)` pairs"))
-    opt_name(opt) ∈ first.(basis_macro_opts) || throw(ArgumentError("Unknown option $(opt_name(opt)). Available options are $(join(first.(basis_macro_opts), ", "))"))
+    opt isa Expr && opt.head == :(=) || throw(ArgumentError("Macro options must be `(name=value)` pairs"))
+    opt_name(opt) ∈ first.(basis_macro_opts) || throw(ArgumentError("Unknown option '$(opt_name(opt))'. Available options are: $(join(first.(basis_macro_opts), ", "))"))
 end
 
 opt_name(opt::Expr) = first(opt.args)
