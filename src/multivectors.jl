@@ -62,10 +62,10 @@ function kvectors end
 function kvector end
 
 function show(io::IO, @nospecialize mv::Multivector)
-    bs = blades(mv)
+    bs = nonzero_blades(mv)
     if isempty(bs)
         print(io, string(scalar(zero(eltype(mv)))))
     else
-        print(io, join(string.(filter(!iszero, collect(bs))), " + "))
+        print(io, join(string.(collect(bs)), " + "))
     end
 end
