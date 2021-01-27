@@ -15,6 +15,8 @@ dimension(::Signature{P,N,D}) where {P,N,D} = P + N + D
 
 is_degenerate(sig::Signature) = degenerate(sig) ≠ 0
 
+triplet(sig::Signature) = (positive(sig), negative(sig), degenerate(sig))
+
 metric(::Signature{P,N,D}, ::Val{I}) where {P,N,D,I} = I <= P ? 1 : I <= P + N ? -1 : 0
 metric(sig::Signature{P,N,D}, i::Val{I}, j::Val{I}) where {P,N,D,I} = metric(sig, i)
 metric(::Signature, ::Val{I}, ::Val{J}) where {I,J} = 0

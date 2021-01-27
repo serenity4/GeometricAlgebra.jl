@@ -42,6 +42,7 @@ export @basis,
     # signatures
     Signature,
     dimension,
+    triplet,
     is_degenerate,
     metric,
 
