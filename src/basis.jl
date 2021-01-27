@@ -41,27 +41,14 @@ function basis(sig::Signature, prefix::Symbol, export_symbols::Bool, export_meta
     mod, modname
 end
 
-opt_name(opt::Expr) = first(opt.args)
-
-function check_opt(opt::Expr)
-    opt.head == :(=) || throw(ArgumentError("Keyword arguments must be `(name=value)` pairs"))
-    opt_name(opt) ∈ first.(basis_macro_opts) || throw(ArgumentError("Unknown option $(opt_name(opt)). Available options are $(join(first.(basis_macro_opts), ", "))"))
+function produce_indices(i, j, sig::Signature)
+    j = j'
+    concat_inds = vcat(i, j)
+    inds = sort(filter(x -> count(i -> i == x, concat_inds) == 1, concat_inds))
+    double_inds = filter(x -> count(i -> i == x, concat_inds) == 2, unique(concat_inds))
+    metric_factor = prod(map(ei -> metric(sig, Val(ei)), double_inds))
+    linear_index(dimension(sig), length(inds), inds), metric_factor * permsign(i, j)
 end
-
-function parse_macro_opts(opts::AbstractVector)
-    check_opt.(opts)
-    map(basis_macro_opts) do opt
-        index = findfirst(==(opt.first), opt_name.(opts))
-        isnothing(index) ? opt.second : last(opts[index].args)
-    end
-end
-
-const basis_macro_opts = [
-    :prefix => :v,
-    :export_symbols => true,
-    :export_metadata => true,
-    :modname => :GeneratedGA,
-]
 
 """
     @basis <signature> [prefix=v, export_symbols=true, export_metadata=true, modname=GeneratedGA]
@@ -94,11 +81,24 @@ macro basis(sig::AbstractString, opts...)
     :($(Expr(:toplevel, esc(mod))); using .$modname)
 end
 
-function produce_indices(i, j, sig::Signature)
-    j = j'
-    concat_inds = vcat(i, j)
-    inds = sort(filter(x -> count(i -> i == x, concat_inds) == 1, concat_inds))
-    double_inds = filter(x -> count(i -> i == x, concat_inds) == 2, unique(concat_inds))
-    metric_factor = prod(map(ei -> metric(sig, Val(ei)), double_inds))
-    linear_index(dimension(sig), length(inds), inds), metric_factor * permsign(i, j)
+const basis_macro_opts = [
+    :prefix => :v,
+    :export_symbols => true,
+    :export_metadata => true,
+    :modname => :GeneratedGA,
+]
+
+function parse_macro_opts(opts::AbstractVector)
+    check_opt.(opts)
+    map(basis_macro_opts) do opt
+        index = findfirst(==(opt.first), opt_name.(opts))
+        isnothing(index) ? opt.second : last(opts[index].args)
+    end
 end
+
+function check_opt(opt::Expr)
+    opt.head == :(=) || throw(ArgumentError("Keyword arguments must be `(name=value)` pairs"))
+    opt_name(opt) ∈ first.(basis_macro_opts) || throw(ArgumentError("Unknown option $(opt_name(opt)). Available options are $(join(first.(basis_macro_opts), ", "))"))
+end
+
+opt_name(opt::Expr) = first(opt.args)
