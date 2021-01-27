@@ -10,4 +10,6 @@ const ga = GeometricAlgebra
 
 @safetestset "Identities in 𝓖₃,₁" begin include("algebras/spacetime.jl") end
 
+@safetestset "3D Conformal Geometric Algebra" begin include("algebras/3d_cga.jl") end
+
 include("aqua.jl")
