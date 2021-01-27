@@ -66,6 +66,6 @@ function show(io::IO, @nospecialize mv::Multivector)
     if isempty(bs)
         print(io, string(scalar(zero(eltype(mv)))))
     else
-        print(io, join(string.(bs), " + "))
+        print(io, join(string.(filter(!iszero, collect(bs))), " + "))
     end
 end
