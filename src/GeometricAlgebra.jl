@@ -1,49 +1,56 @@
 module GeometricAlgebra
 
 using StaticArrays
-using IterTools
 using Combinatorics
 
-import Base: *, +, -, /, ==, ≈
+import Base: sum, +, -, *, /, inv, reverse, ==, ≈, eltype, promote_type, length, zero, fill, getindex, setindex!, broadcastable, convert, show
 
 abstract type GeometricAlgebraType end
 
-Base.broadcastable(x::GeometricAlgebraType) = Ref(x)
+broadcastable(x::GeometricAlgebraType) = Ref(x)
 
 include("utils.jl")
+include("indices.jl")
 include("signatures.jl")
 include("blades.jl")
 include("basis.jl")
 include("multivectors.jl")
-include("conversions.jl")
 include("operators.jl")
 
-export
-    # blades
-    UnitBlade, Blade,
-    grade, grade_index,
-    unit_blades, unit_blades_from_grade,
-    @basis,
-    signature,
-    Zero,
-    𝟎,
+export @basis,
 
-    # multivectors
+    # algebra elements
+    Blade,
+    KVector,
+    Bivector,
+    Trivector,
+    Quadvector,
     Multivector,
     blades,
+    nonzero_blades,
+    grade,
+    grades,
     is_homogeneous,
+    scalar,
 
-    # operators
-    ∧, ⋅, ⦿,
-    lcontract, rcontract,
-    grade_projection,
+    # index manipulation
+    linear_index,
+    grade_from_linear_index,
+    indices_from_linear_index,
+    grade_index,
 
     # signatures
-    Ø,
     Signature,
     dimension,
     is_degenerate,
-    metric
+    metric,
+
+    # operators
+    geom, geom!,
+    ∧, ⋅, ⦿,
+    lcontract, rcontract,
+    grade_projection,
+    reverse_sign
 
 end
 

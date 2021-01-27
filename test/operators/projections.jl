@@ -1,6 +1,6 @@
 @testset "Grade projections" begin
     @testset "Projection to grade $r" for r ∈ 0:4 begin
-            Pᵣ = x -> grade_projection(x, r)
+            Pᵣ = x -> grade_projection(x, Val(r))
             Aᵣ, Bᵣ = As[r+1], Bs[r+1]
             @test Pᵣ(SA) ≈ As[r+1]
             @test Pᵣ(SB) ≈ Bs[r+1]

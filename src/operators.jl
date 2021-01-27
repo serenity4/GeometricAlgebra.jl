@@ -1,39 +1,50 @@
-(+)(x::Blade{S,B}, y::Blade{S,B}) where {S,B} = Blade(x.coef + y.coef, B())
-@commutative (+)(x::GeometricAlgebraType, ::Zero) = x
-(+)(::Zero, ::Zero) = 𝟎
-
-@generated function StaticArrays.SVector(::Type{<:Blade{S}}, ::Type{T}) where {S,T}
-    n = 2^dimension(S)
-    SVector{n, T}(zeros(T, n))
+function sum_homogeneous(k, bs::AbstractVector{Blade{T}}) where {T}
+    kvec = zero(KVector{k}, T)
+    for b ∈ bs
+        add!(kvec, b)
+    end
+    kvec
 end
 
-function (+)(x::Blade{S,B1}, y::Blade{S,B2}) where {S,B1,B2}
-    coefs = SVector(typeof(x), promote_type(eltype(x), eltype(y)))
-    coefs_x = setindex(coefs, x.coef, linear_index(x))
-    Multivector{S}(setindex(coefs_x, y.coef, linear_index(y)))
+sum_homogeneous(k, bs::Blade{T}...) where {T} = sum_homogeneous(k, collect(bs))
+
+function (+)(bs::Blade{T}...) where {T}
+    grades = unique(grade.(bs))
+    if length(grades) == 1
+        k = grades[1]
+        k == 0 && return scalar(reduce(+, getproperty.(bs, :coef)))
+        return sum_homogeneous(k, SVector{length(bs)}(bs))
+    else
+        mvec = zero(Multivector, T)
+        for b ∈ bs
+            add!(mvec, b)
+        end
+        return mvec
+    end
 end
 
-@commutative function (+)(x::Multivector{S}, y::Blade{S}) where {S}
-    dim = dimension(S)
-    index = linear_index(y)
-    coefs = setindex(x.coefs, x.coefs[index] + y.coef, index)
-    Multivector{S}(coefs)
-end
+@commutative (+)(b::Blade, kvec::KVector) = +(b, blades(kvec)...)
+@commutative (+)(b::Blade, mv::Multivector) = +(b, blades(mv)...)
 
-(+)(x::T, y::T) where {T<:Multivector{S} where {S}} = T(x.coefs .+ y.coefs)
-(+)(x::UnitBlade{S}, y::UnitBlade{S}) where {S} = 1x + 1y
+convert(T::Type{<:Blade}, b::Blade) = T(b.coef, b.index)
+convert(T::Type{<:Blade}, x::Number) = scalar(x)
+
+promote_type(T1::Type{<:Blade}, T2::Type{<:Blade}) = Blade{promote_type(eltype(T1), eltype(T2))}
+promote_type(T1::Type{<:KVector}, T2::Type{<:KVector}) = Multivector
+promote_type(T1::Type{<:Multivector}, T2::Type{<:KVector}) = Multivector
+# promote_type(T1::Type{<:Blade}, T2::Type{<:Number}) = Blade{promote_type(eltype(T1), T2)}
+
+(+)(kvecs::KVector{K}...) where {K} = KVector{K}(.+(getproperty.(kvecs, :coefs)...))
+(+)(mvecs::Multivector...) = Multivector(.+(getproperty.(mvecs, :coefs)...))
 (+)(x::GeometricAlgebraType, y::GeometricAlgebraType) = +(promote(x, y)...)
-@commutative (+)(x::GeometricAlgebraType, y::Number) = +(promote(x, y)...)
-@commutative (+)(x::Zero, y::Number) = +(promote(x, y)...)
+@type_commutative (+)(x::GeometricAlgebraType, y::Number) = +(promote(x, y)...)
 
-Base.sum(x::AbstractVector{<:GeometricAlgebraType}) = reduce(+, x)
+sum(x::AbstractVector{<:GeometricAlgebraType}) = reduce(+, x)
 
-(-)(::Zero) = 𝟎
-(-)(x::UnitBlade) = Blade(-1.0, x)
-(-)(x::Blade) = Blade(-x.coef, x.unit_blade)
-(-)(x::Multivector{S}) where {S} = Multivector{S}(map(-, x.coefs))
+(-)(x::Blade) = Blade(-x.coef, x.index)
+(-)(x::Multivector) = Multivector(map(-, x.coefs))
+(-)(x::KVector) = typeof(x)(map(-, x.coefs))
 (-)(x::GeometricAlgebraType, y::GeometricAlgebraType) = x + (-y)
-@type_commutative (-)(x::GeometricAlgebraType, y::Number) = (-)(promote(x, y)...)
 
 """
     x ∧ y
@@ -66,83 +77,108 @@ Right contraction of `x` with `y`.
 """
 function rcontract end
 
-@generated function precompute_unit_blade(x::Type{B1}, y::Type{B2}) where {B1<:UnitBlade{S},B2<:UnitBlade{S}} where {S}
-    concat_inds = vcat(indices(B1), indices(B2))
-    inds = sort(filter(x -> count(i -> i == x, concat_inds) == 1, concat_inds))
-    double_inds = filter(x -> count(i -> i == x, concat_inds) == 2, unique(concat_inds))
-    metric_factor = prod(map(ei -> metric(S, Val(ei)), double_inds))
-    metric_factor, UnitBlade(inds, S)
+function geom end
+
+geom!(res, args...) = add!(res, geom(args...))
+
+@generated op_result_type(op, T1::Type{<:KVector}, T2::Type{<:KVector}) = KVector{result_grade(op, grade(T1), grade(T2)), promote_type(vectype(T1), vectype(T2))}
+
+(*)(x::Blade, y::Blade) = geom(x, y)
+
+function (*)(x::GeometricAlgebraType, y::GeometricAlgebraType)
+    res = zero(op_result_type(*, x, y))
+    geom!(res, x, y)
+    res
 end
 
-@generated function precompute_blade(x::Blade, y::Blade)
-    s = permsign(x, y)
-    metric_factor, vec = precompute_unit_blade(unit_blade(x), unit_blade(y))
-    metric_factor * s, vec
+function geom!(res::Multivector, x::Blade, y::KVector)
+    for b ∈ blades(y)
+        geom!(res, x, b)
+    end
 end
 
-function (*)(x::Blade, y::Blade)
-    λ, vec = precompute_blade(x, y)
-    ρ = x.coef * y.coef
-    Blade(λ * ρ, vec)
+function geom!(res::Multivector, x::KVector, y::Blade)
+    for b ∈ blades(x)
+        geom!(res, b, y)
+    end
 end
 
-(*)(x::UnitBlade{S}, y::UnitBlade{S}) where {S} = prod(precompute_unit_blade(typeof(x), typeof(y)))
-@commutative (*)(x::ScalarBlade{S}, y::Blade{S}) where {S} = Blade(x.coef * y.coef, unit_blade(y))
-(*)(x::ScalarBlade{S}, y::ScalarBlade{S}) where {S} = scalar(x.coef * y.coef, S)
-(*)(x::Multivector{S}, y::Blade{S}) where {S} = sum(blades(x) .* y)
-(*)(x::Blade{S}, y::Multivector{S}) where {S} = sum(x .* blades(y))
-@commutative (*)(x::Multivector{S}, y::ScalarBlade{S}) where {S} = Multivector{S}(x.coefs .* y.coef)
-(*)(::Zero, ::Zero) = 𝟎
-@commutative (*)(::Zero, ::GeometricAlgebraType) = 𝟎
-(*)(x::GeometricAlgebraType, y::GeometricAlgebraType) = *(mul_promote(x, y)...)
-@type_commutative (*)(x::Number, y::GeometricAlgebraType) = *(mul_promote(x, y)...)
+function geom!(res::Multivector, x::KVector, y::KVector)
+    for b ∈ blades(x)
+        geom!(res, b, y)
+    end
+end
 
-@commutative (⋅)(::ScalarBlade{S}, ::Any) where {S} = 𝟎
-(⋅)(::ScalarBlade{S}, ::ScalarBlade{S}) where {S} = 𝟎
-@commutative (⋅)(::ScalarUnitBlade{S}, ::Any) where {S} = 𝟎
-(⋅)(::ScalarUnitBlade{S}, ::ScalarUnitBlade{S}) where {S} = 𝟎
+function geom!(res::Multivector, x::Multivector, y)
+    for kvec ∈ blades(x)
+        geom!(res, kvec, y)
+    end
+end
+
+function geom!(res::Multivector, x::Multivector, y::Multivector)
+    for kvec ∈ blades(y)
+        geom!(res, x, kvec)
+    end
+end
+
+@commutative (*)(x::KVector, y::Number) = typeof(x)(x.coefs .* y, x.start)
+@commutative (*)(x::Multivector, y::Number) = typeof(x)(x.coefs .* y)
+@commutative (*)(x::Blade, y::Number) = Blade(x.coef * y, x.index)
+(*)(xs::GeometricAlgebraType...) = reduce(*, xs)
+
+@commutative (⋅)(x::GeometricAlgebraType, y::Number) = scalar(zero(promote_type(eltype(x), typeof(y))))
+(⋅)(x::GeometricAlgebraType, y::Blade) = is_scalar(y) ? x ⋅ y.coef : grade_projection(x * y, Val(result_grade(⋅, grade(x), grade(y))))
+(⋅)(x::Blade, y::GeometricAlgebraType) = is_scalar(x) ? x.coef ⋅ y : grade_projection(x * y, Val(result_grade(⋅, grade(x)), grade(x)))
+(⋅)(x::Blade, y::Blade) = is_scalar(x) || is_scalar(y) ? scalar(zero(promote_type(eltype(x), eltype(y)))) : grade_projection(x * y, Val(result_grade(⋅, grade(x), grade(y))))
+(⋅)(x::T, y::T) where {T<:Number} = scalar(zero(T))
+(⋅)(x::Number, y::Number) = scalar(zero(promote_type(typeof(x), typeof(y))))
+
+(⦿)(x::Number, y::Number) = scalar(x * y)
+
+@commutative (∧)(x::GeometricAlgebraType, y::Number) = x * y
+(∧)(x::Number, y::Number) = scalar(x * y)
+
 
 for op ∈ [:∧, :⋅, :⦿]
 
     # ⋅ is not associative
     fold = op == :⋅ ? foldr : reduce
     @eval begin
-        ($op)(x::Any, y::Any) = grade_projection(x * y, result_grade($op, grade(x), grade(y)))
+        ($op)(x::GeometricAlgebraType, y::GeometricAlgebraType) = grade_projection(x * y, Val(result_grade($op, grade(x), grade(y))))
         ($op)(x::Any, y::Any, z::Any...) = $fold($op, vcat(x, y, z...))
+        ($op)(x::Multivector, y::Multivector) = sum($op(kx, ky) for kx ∈ kvectors(x), ky ∈ kvectors(y))
+        ($op)(x::GeometricAlgebraType, y::Multivector) = sum($op(x, ky) for ky ∈ kvectors(y))
+        ($op)(x::Multivector, y::GeometricAlgebraType) = sum($op(kx, y) for kx ∈ kvectors(x))
     end
 end
 
-for op ∈ [:∧, :⋅, :*]
-    @eval ($op)(x::Multivector{S}, y::Multivector{S}) where {S} = sum($op(bx, by) for bx ∈ blades(x), by ∈ blades(y))
-end
-
-"""
-Sign of an operation, determined from the sorting permutation of `UnitBlade` indices.
-"""
-permsign(x::Type{<:BladeLike}, y::Type{<:BladeLike}) = permsign(indices(x), indices(y))
 permsign(i, j) =
     1 - 2 * parity(sortperm(SVector{length(i) + length(j),Int}(vcat(i, j))))
 
-function Base.reverse(b::UnitBlade)
-    g = grade(b)
-    (-1) ^ (g * (g - 1) ÷ 2) * b
+reverse_sign(grade) = (-1) ^ (grade * (grade - 1) ÷ 2)
+
+reverse(x::GeometricAlgebraType) = x * reverse_sign(grade(x))
+
+function grade_projection(x::Multivector, ::Val{K}) where {K}
+    K > log2(length(x)) && return scalar(zero(eltype(x)))
+    res = zero(KVector{K}, eltype(x))
+    res.coefs .= x.coefs[indices(res)]
+    res
 end
 
-magnitude2(x::Multivector) = scalar((reverse(x) ⦿ x).coefs[1], signature(x))
-magnitude2(x::Blade) = reverse(x) ⦿ x
+grade_projection(x::KVector{K}, ::Val{K}) where {K} = x
+
+grade_projection(x::KVector, ::Val{K}) where {K} = zero(KVector{K}, eltype(x))
+
+magnitude2(x::Number) = x*x
+magnitude2(x::GeometricAlgebraType) = (reverse(x) ⦿ x).coef
 
 magnitude(x) = sqrt(magnitude2(x))
 
-Base.reverse(b::Blade) = b.coef * reverse(unit_blade(b))
-Base.reverse(mv::Multivector) = sum(reverse.(blades(mv)))
-
-Base.inv(x::GeometricAlgebraType) = reverse(x) / magnitude2(x)
+inv(x::GeometricAlgebraType) = reverse(x) / magnitude2(x)
 
 (/)(x::GeometricAlgebraType, y::GeometricAlgebraType) = x * inv(y)
 @type_commutative (/)(x::Any, y::GeometricAlgebraType) = x * inv(y)
-(/)(x::ScalarBlade{S}, y::ScalarBlade{S}) where {S} = scalar(x.coef / y.coef, S)
-
-Base.sqrt(x::ScalarBlade) = scalar(sqrt(x.coef), signature(x))
 
 """
 Return the grade(s) that can be present in the result of an operation.

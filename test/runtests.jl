@@ -1,5 +1,4 @@
 using GeometricAlgebra
-using StaticArrays
 using Test
 using SafeTestsets
 

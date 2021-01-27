@@ -7,7 +7,7 @@
     @test !is_degenerate(spacetime)
     @test is_degenerate(sig_111)
 
-    @test metric(typeof(v1), typeof(v2)) == 0
-    @test metric(typeof(v1), typeof(v1)) == 1
-    @test metric(typeof(v3), typeof(v3)) == -1
+    @test metric(SIGNATURE, Val(1), Val(1)) == 1
+    @test metric(SIGNATURE, Val(1), Val(2)) == 0
+    @test metric(SIGNATURE, Val(3), Val(3)) == -1
 end

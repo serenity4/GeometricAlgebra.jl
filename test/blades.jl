@@ -1,6 +1,12 @@
 @testset "Blades" begin
-    @test 1v1 == Blade(1, v1)
-    @test 1v2 == Blade(1, v2)
-    @test all(unit_blades_from_grade(3, 1, _S) .== [v1, v2, v3])
+    @test blade.index == 4
+    @test eltype(blade) == Int
+    @test eltype(Blade(1.0, 4)) == Float64
+    @test Blade(1.0, 4) == blade
+    @test Blade(1.0, 5) ≉ blade
+    @test Blade(1.0, 4) ≈ blade
+    @test Blade(1.0, 5) ≉ blade
+    @test is_homogeneous(blade)
+    @test scalar(1.0) == Blade(1.0, 1)
 end
 

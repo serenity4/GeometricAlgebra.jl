@@ -1,21 +1,17 @@
 @testset "Multivectors" begin
-    @test ga.indices(mv_1) == @SVector([[1],[2]])
-    @test ga.indices(mv_2) == @SVector([[1],[1,2],[1,2,3]])
     @test is_homogeneous(mv_1)
-    @test grade(mv_1) == 1
-    @test grade(mv_2) == 3
-    @test all(blades(mv_1) .== Any[1v1, 1v2])
-    @test all(blades(mv_2) .== Any[1v1, 1v12, 1v123])
-    @test mv_1[1] == 1
+    @test grades(mv_1) == [1]
+    @test grades(mv_2) == [1,2,3]
+    @test all(nonzero_blades(mv_1) .== Any[1v1, 1v2])
+    @test all(nonzero_blades(mv_2) .== Any[1v1, 1v12, 1v123])
     @test mv_1[2] == 1
-    @test mv_2[1,2] == 1
-    @test mv_2[1,2,3] == 1
-    @test 1.0f0v * (1v1 + 2v2) == 1.0f0v1 + 2.0f0v2
-    @test 1.0f0 * (1v1 + 2v2) == 1.0f0v1 + 2.0f0v2
-    @test sum(blades(mv_2)) == mv_2
-    @test sum(blades(mv_1)) == mv_1
+    @test mv_1[3] == 1
+    @test mv_2[CartesianIndex(1,2)] == 1
+    @test mv_2[CartesianIndex(1,2,3)] == 1
+    @test sum(nonzero_blades(mv_1)) == sum(blades(mv_1)) == mv_1
+    @test sum(nonzero_blades(mv_2)) == sum(blades(mv_2)) == mv_2
 
-    @test 1v2 + 1v12 == Multivector{_S}(@SVector([0, 0, 1, 0, 1, 0, 0, 0]))
-    @test 1v1 + mv_1 == Multivector{_S}(@SVector([0, 2, 1, 0, 0, 0, 0, 0]))
+    @test 1v2 + 1v12 == Multivector([0, 0, 1, 0, 1, 0, 0, 0])
+    @test 1v1 + mv_1 == Multivector([0, 2, 1, 0, 0, 0, 0, 0])
     @test v1 + v2 == mv_1
 end
