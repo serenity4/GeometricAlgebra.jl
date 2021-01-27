@@ -143,8 +143,17 @@ for op ∈ [:∧, :⋅, :⦿]
 
     # ⋅ is not associative
     fold = op == :⋅ ? foldr : reduce
+
+    if op == :⦿
+        @eval begin
+            ($op)(x::GeometricAlgebraType, y::GeometricAlgebraType) = first(grade_projection(x * y, Val(0)).coefs)
+            ($op)(x::Blade, y::Blade) = grade_projection(x * y, Val(0)).coef
+        end
+    else
+        @eval ($op)(x::GeometricAlgebraType, y::GeometricAlgebraType) = grade_projection(x * y, Val(result_grade($op, grade(x), grade(y))))        
+    end
+
     @eval begin
-        ($op)(x::GeometricAlgebraType, y::GeometricAlgebraType) = grade_projection(x * y, Val(result_grade($op, grade(x), grade(y))))
         ($op)(x::Any, y::Any, z::Any...) = $fold($op, vcat(x, y, z...))
         ($op)(x::Multivector, y::Multivector) = sum($op(kx, ky) for kx ∈ kvectors(x), ky ∈ kvectors(y))
         ($op)(x::GeometricAlgebraType, y::Multivector) = sum($op(x, ky) for ky ∈ kvectors(y))
@@ -171,8 +180,7 @@ grade_projection(x::KVector{K}, ::Val{K}) where {K} = x
 grade_projection(x::KVector, ::Val{K}) where {K} = zero(KVector{K}, eltype(x))
 
 magnitude2(x::Number) = x*x
-magnitude2(x::Blade) = (reverse(x) ⦿ x).coef
-magnitude2(x::GeometricAlgebraType) = first((reverse(x) ⦿ x).coefs)
+magnitude2(x::GeometricAlgebraType) = reverse(x) ⦿ x
 
 magnitude(x) = sqrt(abs(magnitude2(x)))
 
