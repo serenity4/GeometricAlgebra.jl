@@ -1,4 +1,4 @@
-function basis(sig::Signature, prefix::Symbol, export_symbols::Bool, export_metadata::Bool, modname::Symbol)
+function basis(sig::Signature, prefix::Symbol, export_symbols::Bool, export_metadata::Bool, export_pseudoscalar::Bool, modname::Symbol)
     prefix isa Symbol || throw(ArgumentError("Only symbols are supported for the second argument (received $prefix)"))
 
     n = dimension(sig)
@@ -16,13 +16,13 @@ function basis(sig::Signature, prefix::Symbol, export_symbols::Bool, export_meta
     export_metadata && append!(exports, [:N, :SIGNATURE, :TABLE, :MultivectorArray])
 
     mod = :(module $modname
-        using GeometricAlgebra: GeometricAlgebra, subscript, reverse_sign, scalar
+        using GeometricAlgebra: GeometricAlgebra, subscript, reverse_sign, scalar, ⋅, ∧
         using GeometricAlgebra.StaticArrays
 
         const ga = GeometricAlgebra
 
         import Base: fill, zero, *, getindex, show, reverse
-        import GeometricAlgebra: Blade, KVector, Multivector, grade, grade_projection, geom, op_result_type, kvectors, kvector
+        import GeometricAlgebra: Blade, KVector, Multivector, grade, grade_projection, geom, op_result_type, kvectors, kvector, dual, ∨
 
         $(exprs...)
 
