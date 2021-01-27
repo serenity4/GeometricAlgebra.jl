@@ -48,8 +48,9 @@ export @basis,
 
     # operators
     geom, geom!,
-    ∧, ⋅, ⦿,
+    ∧, ⋅, ⦿, ∨,
     lcontract, rcontract,
+    dual,
     grade_projection,
     reverse_sign,
     magnitude,

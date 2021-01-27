@@ -66,6 +66,12 @@ Scalar product between `x` and `y`.
 function ⦿ end
 
 """
+    x ∨ y
+Meet of `x` and `y`
+"""
+function ∨ end
+
+"""
     lcontract(x, y)
 Left contraction of `x` with `y`.
 """
@@ -78,6 +84,11 @@ Right contraction of `x` with `y`.
 function rcontract end
 
 function geom end
+
+"""
+Duality operator.
+"""
+function dual end
 
 geom!(res, args...) = add!(res, geom(args...))
 

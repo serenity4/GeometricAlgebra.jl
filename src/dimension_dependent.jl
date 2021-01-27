@@ -41,6 +41,10 @@ function grade(mv::Multivector)
     findfirst(≤(higher_nonzero_index), linear_index.(0:N) .+ 1) - 1
 end
 
+dual(x) = x ⋅ reverse(I)
+
+(∨)(xs...) = ∧(dual.(xs)...) ⋅ I
+
 reverse(x::Multivector) = Multivector(map(x -> reverse_sign(grade_from_linear_index(x[1])[1]) * x[2], enumerate(x.coefs)))
 
 """
