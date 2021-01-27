@@ -50,7 +50,9 @@ export @basis,
     ∧, ⋅, ⦿,
     lcontract, rcontract,
     grade_projection,
-    reverse_sign
+    reverse_sign,
+    magnitude,
+    magnitude2
 
 end
 
