@@ -8,4 +8,5 @@
     include("operators/inverse.jl")
     include("operators/promotions.jl")
     include("operators/projections.jl")
+    include("operators/magnitude.jl")
 end
