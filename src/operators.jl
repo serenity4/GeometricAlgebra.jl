@@ -197,7 +197,7 @@ magnitude2(x) = x ⦿ x
 
 magnitude(x) = sqrt(abs(magnitude2(x)))
 
-inv(x::GeometricAlgebraType) = reverse(x) / magnitude2(x)
+inv(x::GeometricAlgebraType) = x / magnitude2(x)
 
 (/)(x::GeometricAlgebraType, y::GeometricAlgebraType) = x * inv(y)
 @type_commutative (/)(x::Any, y::GeometricAlgebraType) = x * inv(y)
