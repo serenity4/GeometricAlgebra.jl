@@ -10,4 +10,5 @@
     include("operators/projections.jl")
     include("operators/magnitude.jl")
     include("operators/dual.jl")
+    include("operators/regressive_product.jl")
 end
