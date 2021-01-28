@@ -9,12 +9,12 @@ point(x) = 0.5 * (2x + magnitude2(x) * n - n̄)
 point_pair(A, B) = A ∧ B
 circle(A, B, C) = point_pair(A, B) ∧ C
 line(A, B) = circle(A, B, n)
-norm(X) = -X ⋅ n
 sphere(A, B, C, D) = circle(A, B, C) ∧ D
 plane(A, B, C) = sphere(A, B, C, n)
 radius2(X::Trivector) = - X^2 / (X ∧ n)^2
 radius2(X::Quadvector) = X^2 / (X ∧ n)^2
-normalize(X) = - X / (X ⋅ n)
+norm(X) = - X ⋅ n
+normalize(X) = X / norm(X)
 center(X) = X * n * X
 
 @testset "3D Conformal Geometric Algebra" begin
@@ -65,12 +65,5 @@ center(X) = X * n * X
     end
 end
 
-# M = line(O, A) ∨ line(A, C)
-# circle(A, B, C) ∨ circle(A, B, D)
-
-# @test dual(A) == A ⋅ reverse(I)
-# @test dual(dual(A) ∧ dual(B)) == A ∨ B
-
-# @test (a - b)^2 == -2 * (A ⋅ B) / ((A ⋅ n) * (B ⋅ n))
-
-# @test norm(A) == 1v
+# @test C1 ∨ C2 == point(1v1)
+# @test line(point(0v1), point(1v1 + 1v2)) ∨ line(point(1v1), point(1v1 + 1v2)) == point(1v1 + 1v2)
