@@ -1,6 +1,7 @@
 @testset "Magnitude" begin
     @test magnitude(A₀) == 0.9
     @test magnitude2(A₀) == 0.81
+    @test magnitude(1.2) == magnitude(-1.2) == 1.2
 
     if triplet(SIGNATURE) == (1, 3, 0)
         @test magnitude(NHB₁) == sqrt(0.8^2 - 0.3^2)

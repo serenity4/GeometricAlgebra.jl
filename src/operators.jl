@@ -148,7 +148,7 @@ end
 (⋅)(x::T, y::T) where {T<:Number} = scalar(zero(T))
 (⋅)(x::Number, y::Number) = scalar(zero(promote_type(typeof(x), typeof(y))))
 
-(⦿)(x::Number, y::Number) = scalar(x * y)
+(⦿)(x::Number, y::Number) = x * y
 
 @commutative (∧)(x::GeometricAlgebraType, y::Number) = x * y
 (∧)(x::Number, y::Number) = scalar(x * y)
@@ -193,8 +193,7 @@ grade_projection(x::KVector{K}, ::Val{K}) where {K} = x
 
 grade_projection(x::KVector, ::Val{K}) where {K} = zero(KVector{K}, eltype(x))
 
-magnitude2(x::Number) = x*x
-magnitude2(x::GeometricAlgebraType) = reverse(x) ⦿ x
+magnitude2(x) = x ⦿ x
 
 magnitude(x) = sqrt(abs(magnitude2(x)))
 
