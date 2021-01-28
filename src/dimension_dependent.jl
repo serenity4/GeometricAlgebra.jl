@@ -25,7 +25,7 @@ function grade(mv::Multivector)
     findfirst(≤(higher_nonzero_index), linear_index.(0:N) .+ 1) - 1
 end
 
-dual(x) = x ⋅ reverse(I)
+dual(x) = x / I
 
 (∨)(xs...) = ∧(dual.(xs)...) ⋅ I
 

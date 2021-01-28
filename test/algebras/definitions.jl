@@ -52,3 +52,5 @@ NHC₄ = 1.1v1234
 
 NHBs = (NHB₀, NHB₁, NHB₂, NHB₃, NHB₄)
 NHCs = (NHC₀, NHC₁, NHC₂, NHC₃, NHC₄)
+
+NHZs = tuple(NHBs..., NHCs...)
