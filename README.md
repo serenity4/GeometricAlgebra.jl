@@ -22,5 +22,6 @@ Here are some resources to get started with geometric algebra:
 #### Geometric Calculus:
 - Reference book: *Hestenes, D., & Sobczyk, G. (2012). Clifford algebra to geometric calculus: a unified language for mathematics and physics (Vol. 5). Springer Science & Business Media.*
 - Tutorial (advanced): https://www.youtube.com/watch?v=ItGlUbFBFfc
+- Compact summary (advanced): *Macdonald, A. (2017). A survey of geometric algebra and geometric calculus. Advances in Applied Clifford Algebras, 27(1), 853-891.*
 
 Online resources: https://bivector.net
