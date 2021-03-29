@@ -5,7 +5,9 @@
 [![](https://img.shields.io/badge/docs-dev-blue.svg)](https://serenity4.github.io/GeometricAlgebra.jl/dev)
 [![Aqua QA](https://img.shields.io/badge/Aqua.jl-%F0%9F%8C%A2-aqua.svg)](https://github.com/tkf/Aqua.jl)
 
-Geometric Algebra (GA) library. Currently in heavy development.
+Geometric Algebra (GA) library. The public API was inspired by that of [Grassmann.jl](https://github.com/chakravala/Grassmann.jl).
+
+This package is currently in heavy development. The source code and public API may change at any moment. Use at your own risk. General users may want to consider using [Grassmann.jl](https://github.com/chakravala/Grassmann.jl) instead. It is an AGPL-licensed GA library that is more stable and feature complete.
 
 ## About GA
 
