@@ -1,4 +1,5 @@
 using GeometricAlgebra
+using Test
 
 @basis "++++-"
 
