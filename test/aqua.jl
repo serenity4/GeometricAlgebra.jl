@@ -1,3 +1,3 @@
 using Aqua
 
-Aqua.test_all(ga, ambiguities=false, unbound_args=false)
+Aqua.test_all(GeometricAlgebra, ambiguities=false, unbound_args=false)
