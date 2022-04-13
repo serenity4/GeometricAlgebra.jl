@@ -3,7 +3,7 @@ module GeometricAlgebra
 using StaticArrays
 using Combinatorics
 
-import Base: sum, +, -, *, /, ^, inv, reverse, ==, ≈, eltype, promote_rule, length, zero, fill, getindex, setindex!, broadcastable, convert, show
+import Base: sum, +, -, *, /, ^, inv, reverse, ==, ≈, eltype, promote_rule, length, zero, iszero, fill, getindex, setindex!, broadcastable, convert, show
 
 abstract type GeometricAlgebraType end
 
@@ -46,7 +46,7 @@ export @basis,
 
     # operators
     geom, geom!,
-    ∧, ⋅, ⦿, ∨,
+    ∧, ⋅, ⦿, ∨, ×,
     lcontract, rcontract,
     dual,
     grade_projection,
@@ -55,4 +55,3 @@ export @basis,
     magnitude2
 
 end
-

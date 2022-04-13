@@ -152,6 +152,7 @@ end
 
 @commutative (∧)(x::GeometricAlgebraType, y::Number) = x * y
 (∧)(x::Number, y::Number) = scalar(x * y)
+(×)(x, y) = (x * y - y * x) / 2
 
 for op ∈ [:∧, :⋅, :⦿]
 

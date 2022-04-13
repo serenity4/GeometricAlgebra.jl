@@ -17,7 +17,7 @@ is_homogeneous(::Blade) = true
 (==)(x::Blade, y::Blade) = x.index == y.index && x.coef == y.coef
 (≈)(x::Blade, y::Blade; kwargs...) = x.index == y.index && isapprox(x.coef, y.coef; kwargs...)
 
-Base.iszero(b::Blade) = b.coef ≈ 0
+iszero(b::Blade) = b.coef ≈ 0
 
 struct KVector{K,V<:MVector}<:GeometricAlgebraType
     coefs::V

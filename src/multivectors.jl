@@ -14,6 +14,7 @@ length(T::Type{<:Multivector}) = length(vectype(T))
 length(mv::Multivector) = length(typeof(mv))
 
 zero(::Type{<:Multivector{V}}) where {V} = Multivector(zeros(V))
+iszero(mv::Multivector) = mv == zero(typeof(mv))
 
 grades(mv::Multivector) = unique(grade.(nonzero_blades(mv)))
 
@@ -33,7 +34,7 @@ broadcastable(mv::Multivector) = mv.coefs
 (==)(x::Multivector, y::Multivector) = all(x.coefs .== y.coefs)
 @commutative (==)(x::Blade, y::GeometricAlgebraType) = x.coef == value(y, x)
 
-(≈)(x::Multivector, y::Multivector; kwargs...) = all(.≈(x.coefs, y.coefs; kwargs...))
+(≈)(x::Multivector, y::Multivector; kwargs...) = all(≈(cx, cy; kwargs...) for (cx, cy) in zip(x.coefs, y.coefs))
 (≈)(x::Blade, y::GeometricAlgebraType; kwargs...) = ≈(x.coef, value(y, x); kwargs...)
 (≈)(y::GeometricAlgebraType, x::Blade; kwargs...) = ≈(x.coef, value(y, x); kwargs...)
 
